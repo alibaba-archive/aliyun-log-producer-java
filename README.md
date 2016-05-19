@@ -35,8 +35,11 @@ public class ProducerConfig
 	public int retryTimes = 3;
 }
 ```
-step 2：继承ILogCallback，callback主要用于日志发送结果的处理，结果包括发送成功和发生异常。
+step 2：继承ILogCallback，callback主要用于日志发送结果的处理，结果包括发送成功和发生异常。用户也可以选择不处理，这样就不需要继承ILogCallback，定制自己的处理逻辑。
 
+step 3：创建producer实例，调用send接口发数据。
+
+下面是一个完整的示例。
 ### 示例
 main:
 ```java
