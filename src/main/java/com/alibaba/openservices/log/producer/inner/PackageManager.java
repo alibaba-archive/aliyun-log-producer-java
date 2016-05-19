@@ -14,8 +14,7 @@ import com.alibaba.openservices.log.producer.ILogCallback;
 import com.aliyun.openservices.log.common.LogContent;
 import com.aliyun.openservices.log.common.LogItem;
 
-public class PackageManager 
-{
+public class PackageManager {
 	private ReadWriteLock metaRWLock = new ReentrantReadWriteLock();
 	private HashMap<String, PackageMeta> metaMap = new HashMap<String, PackageMeta>();
 	private ConcurrentHashMap<String, PackageData> dataMap = new ConcurrentHashMap<String, PackageData>();
@@ -24,6 +23,7 @@ public class PackageManager
 	private IOThread ioThread;
 	private ControlThread controlThread;
 	private ShardHashManager shardHashManager;
+
 	public PackageManager(ProducerConfig config, ClientPool pool) {
 		super();
 		this.config = config;
@@ -32,55 +32,52 @@ public class PackageManager
 		shardHashManager = new ShardHashManager(pool, config);
 		controlThread = new ControlThread(shardHashManager, this, config);
 	}
-	private static int LogItemListBytes(List<LogItem> logItems)
-	{
+
+	private static int LogItemListBytes(List<LogItem> logItems) {
 		int b = 0;
-		for(LogItem it: logItems)
-		{
+		for (LogItem it : logItems) {
 			b += 4;
-			for(LogContent con: it.GetLogContents())
-			{
+			for (LogContent con : it.GetLogContents()) {
 				b += con.mKey.length() + con.mValue.length();
 			}
 		}
 		return b;
 	}
-	void acquireBytes(final int b)
-	{
+
+	void acquireBytes(final int b) {
 		semaphore.acquireUninterruptibly(b);
 	}
-	void releaseBytes(final int b)
-	{
+
+	void releaseBytes(final int b) {
 		semaphore.release(b);
 	}
-	void filterTimeoutPackage()
-	{
+
+	void filterTimeoutPackage() {
 		ArrayList<String> timeoutList = new ArrayList<String>();
 		metaRWLock.writeLock().lock();
-		for(Entry<String, PackageMeta> entry: metaMap.entrySet())
-		{
+		for (Entry<String, PackageMeta> entry : metaMap.entrySet()) {
 			PackageMeta meta = entry.getValue();
 			meta.lock.lock();
-			if(System.currentTimeMillis() - meta.arriveTimeInMS >= config.packageTimeoutInMS)
-			{
+			if (System.currentTimeMillis() - meta.arriveTimeInMS >= config.packageTimeoutInMS) {
 				PackageData data = dataMap.remove(entry.getKey());
-				ioThread.addPackage(data, meta.packageBytes, meta.logLinesCount);
+				if (meta.logLinesCount > 0) {
+					ioThread.addPackage(data, meta.packageBytes,
+							meta.logLinesCount);
+				}
 				timeoutList.add(entry.getKey());
 			}
 			meta.lock.unlock();
 		}
-		for(String key: timeoutList)
-		{
+		for (String key : timeoutList) {
 			metaMap.remove(key);
 		}
 		metaRWLock.writeLock().unlock();
 	}
-	public void flush()
-	{
+
+	public void flush() {
 		ArrayList<String> timeoutList = new ArrayList<String>();
 		metaRWLock.writeLock().lock();
-		for(Entry<String, PackageMeta> entry: metaMap.entrySet())
-		{
+		for (Entry<String, PackageMeta> entry : metaMap.entrySet()) {
 			PackageMeta meta = entry.getValue();
 			meta.lock.lock();
 			PackageData data = dataMap.remove(entry.getKey());
@@ -88,64 +85,62 @@ public class PackageManager
 			meta.lock.unlock();
 			timeoutList.add(entry.getKey());
 		}
-		for(String key: timeoutList)
-		{
+		for (String key : timeoutList) {
 			metaMap.remove(key);
 		}
 		metaRWLock.writeLock().unlock();
 	}
-	public void close()
-	{
+
+	public void close() {
 		controlThread.stop();
 		ioThread.stop();
 	}
-	public void add(String project, String logStore, String topic, String shardHash, String source, List<LogItem> logItems, ILogCallback callabck)
-	{
-		if(shardHash != null)
-		{
-			shardHash = shardHashManager.getBeginHash(project, logStore, shardHash);
+
+	public void add(String project, String logStore, String topic,
+			String shardHash, String source, List<LogItem> logItems,
+			ILogCallback callabck) {
+		if (shardHash != null) {
+			shardHash = shardHashManager.getBeginHash(project, logStore,
+					shardHash);
 		}
 		StringBuilder strb = new StringBuilder();
-		strb.append(project).append("|").append(logStore).append("|").append(topic).append("|").append(shardHash).append("|").append(source);
+		strb.append(project).append("|").append(logStore).append("|")
+				.append(topic).append("|").append(shardHash).append("|")
+				.append(source);
 		String key = strb.toString();
 		int linesCount = logItems.size();
 		int logBytes = LogItemListBytes(logItems);
-		
+
 		acquireBytes(logBytes);
-		
+
 		metaRWLock.readLock().lock();
 		PackageMeta meta = metaMap.get(key);
-		if(meta == null)
-		{
+		if (meta == null) {
 			metaRWLock.readLock().unlock();
 			metaRWLock.writeLock().lock();
 			meta = metaMap.get(key);
-			if(meta == null)
-			{
+			if (meta == null) {
 				meta = new PackageMeta(0, 0);
 				metaMap.put(key, meta);
 			}
 			meta.lock.lock();
 			metaRWLock.writeLock().unlock();
-		}
-		else
-		{
+		} else {
 			meta.lock.lock();
 			metaRWLock.readLock().unlock();
 		}
 		PackageData data = dataMap.get(key);
-		if(meta.logLinesCount > 0 && (meta.logLinesCount + linesCount >= config.logsCountPerPackage
-				|| meta.packageBytes + logBytes >= config.logsBytesPerPackage
-				|| System.currentTimeMillis() - meta.arriveTimeInMS >= config.packageTimeoutInMS))
-		{
+		if (meta.logLinesCount > 0
+				&& (meta.logLinesCount + linesCount >= config.logsCountPerPackage
+						|| meta.packageBytes + logBytes >= config.logsBytesPerPackage || System
+						.currentTimeMillis() - meta.arriveTimeInMS >= config.packageTimeoutInMS)) {
 			ioThread.addPackage(data, meta.packageBytes, meta.logLinesCount);
 			dataMap.remove(key);
 			data = null;
 			meta.clear();
 		}
-		
-		if(data == null)
-		{
+
+		if (data == null) {
 			data = new PackageData(project, logStore, topic, shardHash, source);
 			dataMap.put(key, data);
 		}
