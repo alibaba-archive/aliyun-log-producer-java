@@ -64,10 +64,10 @@ public class PackageManager
 			if(System.currentTimeMillis() - meta.arriveTimeInMS >= config.packageTimeoutInMS)
 			{
 				PackageData data = dataMap.remove(entry.getKey());
-				ioThread.addPackage(data, meta.packageBytes);
+				ioThread.addPackage(data, meta.packageBytes, meta.logLinesCount);
+				timeoutList.add(entry.getKey());
 			}
 			meta.lock.unlock();
-			timeoutList.add(entry.getKey());
 		}
 		for(String key: timeoutList)
 		{
@@ -84,7 +84,7 @@ public class PackageManager
 			PackageMeta meta = entry.getValue();
 			meta.lock.lock();
 			PackageData data = dataMap.remove(entry.getKey());
-			ioThread.addPackage(data, meta.packageBytes);
+			ioThread.addPackage(data, meta.packageBytes, meta.logLinesCount);
 			meta.lock.unlock();
 			timeoutList.add(entry.getKey());
 		}
@@ -138,7 +138,7 @@ public class PackageManager
 				|| meta.packageBytes + logBytes >= config.logsBytesPerPackage
 				|| System.currentTimeMillis() - meta.arriveTimeInMS >= config.packageTimeoutInMS))
 		{
-			ioThread.addPackage(data, meta.packageBytes);
+			ioThread.addPackage(data, meta.packageBytes, meta.logLinesCount);
 			dataMap.remove(key);
 			data = null;
 			meta.clear();

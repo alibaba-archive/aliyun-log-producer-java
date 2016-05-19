@@ -41,9 +41,9 @@ class IOThread implements Runnable {
 		}
 	}
 
-	public void addPackage(PackageData data, int kBytes) {
+	public void addPackage(PackageData data, int bytes, int logLineCount) {
 		try {
-			dataQueue.put(new BlockedData(data, kBytes));
+			dataQueue.put(new BlockedData(data, bytes));
 		} catch (InterruptedException e) {
 		}
 	}
