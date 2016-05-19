@@ -11,7 +11,156 @@ log producer解决上面问题的方法是会将日志merge到一定数量才真
 5. 内存使用可控。
 
 ## 使用方法
-### 示例
-```java
+producer使用分为以下几个步骤：
 
+step 1：程序中配置ProducerConfig，其中各个参数说明如下。
+```java
+public class ProducerConfig 
+{
+	//被缓存起来的日志的发送超时时间，如果缓存超时，则会被立即发送，单位是毫秒
+	public int packageTimeoutInMS = 50000;
+	//每个缓存的日志包中包含日志数量的最大值，不能超过4096
+	public int logsCountPerPackage = 4096;
+	//每个缓存的日志包的大小的上限，不能超过5MB，单位是字节
+	public int logsBytesPerPackage = 5 * 1024 * 1024;
+	//单个producer实例可以使用的内存的上限，单位是字节
+	public int memPoolSizeInByte = 1000 * 1024 * 1024;
+	//后台用于发送日志包的IO线程的数量
+	public int ioThreadsCount = 1;
+	//当使用指定shardhash的方式发送日志时，这个参数需要被设置，否则不需要关心。后端merge线程会将映射到同一个shard的数据merge在一起，而shard关联的是一个hash区间，
+	//producer在处理时会将用户传入的hash映射成shard关联hash区间的最小值。每一个shard关联的hash区间，producer会定时从从loghub拉取，该参数的含义是每隔shardHashUpdateIntervalInMS毫秒，
+	//更新一次shard的hash区间。
+	public int shardHashUpdateIntervalInMS = 10 * 60 * 1000;
+	//如果发送失败，重试的次数，如果超过该值，就会将异常作为callback的参数，交由用户处理。
+	public int retryTimes = 3;
+}
+```
+step 2：继承ILogCallback，callback主要用于日志发送结果的处理，结果包括发送成功和发生异常。
+
+### 示例
+main:
+```java
+package com.alibaba.openservices.log.producer.sample;
+
+import java.util.Date;
+import java.util.Random;
+import java.util.Vector;
+
+import com.alibaba.openservices.log.producer.LogProducer;
+import com.alibaba.openservices.log.producer.ProducerConfig;
+import com.alibaba.openservices.log.producer.ProjectConfig;
+import com.aliyun.openservices.log.common.LogItem;
+
+public class ProducerSample {
+	private final static int ThreadsCount = 25;
+
+	public static String RandomString(int length) {
+		String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		Random random = new Random();
+		StringBuffer buf = new StringBuffer();
+		for (int i = 0; i < length; i++) {
+			int num = random.nextInt(62);
+			buf.append(str.charAt(num));
+		}
+		return buf.toString();
+	}
+
+	public static void main(String args[]) throws InterruptedException {
+		ProducerConfig producerConfig = new ProducerConfig();
+		// 使用默认producer配置
+		final LogProducer producer = new LogProducer(producerConfig);
+		// 添加多个project配置
+		producer.updateProjectConfig(new ProjectConfig("your project 1",
+				"endpoint", "your accesskey id", "your accesskey"));
+		producer.updateProjectConfig(new ProjectConfig("your project 2",
+				"endpoint", "your accesskey id", "your accesskey",
+				"your sts token"));
+		// 更新project 1的配置
+		producer.updateProjectConfig(new ProjectConfig("your project 1",
+				"endpoint", "your new accesskey id", "your new accesskey"));
+		// 删除project 2的配置
+		producer.removeProjectConfig("your project 2");
+		// 生成日志集合，用于测试
+		final Vector<Vector<LogItem>> logGroups = new Vector<Vector<LogItem>>();
+		for (int i = 0; i < 100000; ++i) {
+			Vector<LogItem> tmpLogGroup = new Vector<LogItem>();
+			LogItem logItem = new LogItem((int) (new Date().getTime() / 1000));
+			logItem.PushBack("level", "info" + System.currentTimeMillis());
+			logItem.PushBack("message", "test producer send perf "
+					+ RandomString(50));
+			logItem.PushBack("method", "SenderToServer " + RandomString(10));
+			tmpLogGroup.add(logItem);
+			logGroups.add(tmpLogGroup);
+		}
+		// 并发调用send发送日志
+		Thread[] threads = new Thread[ThreadsCount];
+		for (int i = 0; i < ThreadsCount; ++i) {
+			threads[i] = new Thread(null, new Runnable() {
+				Random random = new Random();
+
+				public void run() {
+					int j = 0, rand = random.nextInt(99999);
+					while (++j < Integer.MAX_VALUE) {
+						producer.send("project 1", "logstore 1", "topic",
+								"source ip", logGroups.get(rand),
+								new CallbackSample("project 1", "logstore 1", "topic", "source ip", null, logGroups.get(rand), producer));
+					}
+				}
+			}, i + "");
+			threads[i].start();
+		}
+		//主动刷新缓存起来的还没有被发送的日志
+		producer.flush();
+		//关闭后台io线程
+		producer.close();
+	}
+}
+```
+callback:
+```java
+package com.alibaba.openservices.log.producer.sample;
+
+import java.util.Vector;
+
+import com.alibaba.openservices.log.producer.ILogCallback;
+import com.alibaba.openservices.log.producer.LogProducer;
+import com.aliyun.openservices.log.common.LogItem;
+import com.aliyun.openservices.log.exception.LogException;
+import com.aliyun.openservices.log.response.PutLogsResponse;
+
+public class CallbackSample implements ILogCallback {
+	public String project;
+	public String logstore;
+	public String topic;
+	public String shardHash;
+	public String source;
+	public Vector<LogItem> items;
+	public LogProducer producer;
+	public int retryTimes = 0;
+	public CallbackSample(String project, String logstore, String topic,
+			String shardHash, String source, Vector<LogItem> items, LogProducer producer) {
+		super();
+		this.project = project;
+		this.logstore = logstore;
+		this.topic = topic;
+		this.shardHash = shardHash;
+		this.source = source;
+		this.items = items;
+		this.producer = producer;
+	}
+
+	public void onCompletion(PutLogsResponse response, LogException e) {
+		if (e != null) {
+			System.out.println(e.GetErrorCode() + ", " + e.GetErrorMessage() + ", " + e.GetRequestId());
+			if(retryTimes++ < 3)
+			{
+				producer.send(project, logstore, topic, source, shardHash, items, this);
+			}
+		}
+		else{
+			System.out.println("send success, request id: " + response.GetRequestId());
+		}
+	}
+
+}
 ```
