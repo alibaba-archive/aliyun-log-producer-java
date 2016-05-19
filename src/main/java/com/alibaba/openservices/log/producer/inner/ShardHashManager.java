@@ -43,6 +43,7 @@ public class ShardHashManager {
 			if (cur - entry.getValue().updateTime > producerConfig.shardHashUpdateIntervalInMS * 2) {
 				removes.add(entry.getKey());
 			}
+			entry.getValue().rwLock.readLock().unlock();
 		}
 		rwLock.readLock().unlock();
 		if (!removes.isEmpty()) {
