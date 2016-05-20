@@ -28,13 +28,13 @@ public class ProducerSample {
 		// 使用默认producer配置
 		final LogProducer producer = new LogProducer(producerConfig);
 		// 添加多个project配置
-		producer.updateProjectConfig(new ProjectConfig("your project 1",
+		producer.setProjectConfig(new ProjectConfig("your project 1",
 				"endpoint", "your accesskey id", "your accesskey"));
-		producer.updateProjectConfig(new ProjectConfig("your project 2",
+		producer.setProjectConfig(new ProjectConfig("your project 2",
 				"endpoint", "your accesskey id", "your accesskey",
 				"your sts token"));
 		// 更新project 1的配置
-		producer.updateProjectConfig(new ProjectConfig("your project 1",
+		producer.setProjectConfig(new ProjectConfig("your project 1",
 				"endpoint", "your new accesskey id", "your new accesskey"));
 		// 删除project 2的配置
 		producer.removeProjectConfig("your project 2");

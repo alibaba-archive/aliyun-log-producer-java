@@ -17,7 +17,7 @@ public class LogProducer
 		this.producerConfig = producerConfig;
 		this.manager = new PackageManager(producerConfig, clientPool);
 	}
-	public void updateProjectConfig(ProjectConfig config)
+	public void setProjectConfig(ProjectConfig config)
 	{
 		clientPool.updateClient(config);
 	}
