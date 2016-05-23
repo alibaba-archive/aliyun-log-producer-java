@@ -15,7 +15,7 @@ public class LogProducer
 	public LogProducer(ProducerConfig producerConfig) {
 		super();
 		this.producerConfig = producerConfig;
-		this.manager = new PackageManager(producerConfig, clientPool);
+		this.manager = new PackageManager(this.producerConfig, clientPool);
 	}
 	public void setProjectConfig(ProjectConfig config)
 	{
