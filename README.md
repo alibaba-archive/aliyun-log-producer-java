@@ -43,17 +43,6 @@ step 3：创建producer实例，调用send接口发数据。
 ### 示例
 main:
 ```java
-package com.alibaba.openservices.log.producer.sample;
-
-import java.util.Date;
-import java.util.Random;
-import java.util.Vector;
-
-import com.alibaba.openservices.log.producer.LogProducer;
-import com.alibaba.openservices.log.producer.ProducerConfig;
-import com.alibaba.openservices.log.producer.ProjectConfig;
-import com.aliyun.openservices.log.common.LogItem;
-
 public class ProducerSample {
 	private final static int ThreadsCount = 25;
 
@@ -123,16 +112,6 @@ public class ProducerSample {
 ```
 callback:
 ```java
-package com.alibaba.openservices.log.producer.sample;
-
-import java.util.Vector;
-
-import com.alibaba.openservices.log.producer.ILogCallback;
-import com.alibaba.openservices.log.producer.LogProducer;
-import com.aliyun.openservices.log.common.LogItem;
-import com.aliyun.openservices.log.exception.LogException;
-import com.aliyun.openservices.log.response.PutLogsResponse;
-
 public class CallbackSample implements ILogCallback {
     //保存要发送的数据，当时发生异常时，进行重试
 	public String project;
