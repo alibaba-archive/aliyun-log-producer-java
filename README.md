@@ -12,8 +12,16 @@ log producer解决上面问题的方法是会将日志merge到一定数量才真
 
 ## 使用方法
 producer使用分为以下几个步骤：
-
-step 1：程序中配置ProducerConfig，其中各个参数说明如下。
+step 1:
+maven工程中添加依赖：
+```
+<dependency>
+	<groupId>com.aliyun</groupId>
+	<artifactId>sls-loghub-producer-inner</artifactId>
+	<version>0.1</version>
+</dependency>
+```
+step 2：程序中配置ProducerConfig，其中各个参数说明如下。
 ```java
 public class ProducerConfig 
 {
@@ -35,9 +43,9 @@ public class ProducerConfig
 	public int retryTimes = 3;
 }
 ```
-step 2：继承ILogCallback，callback主要用于日志发送结果的处理，结果包括发送成功和发生异常。用户也可以选择不处理，这样就不需要继承ILogCallback。
+step 3：继承ILogCallback，callback主要用于日志发送结果的处理，结果包括发送成功和发生异常。用户也可以选择不处理，这样就不需要继承ILogCallback。
 
-step 3：创建producer实例，调用send接口发数据。
+step 4：创建producer实例，调用send接口发数据。
 
 下面是一个完整的示例。
 ### 示例
