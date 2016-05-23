@@ -2,11 +2,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.aliyun</groupId>
+	<groupId>com.aliyun.openservices</groupId>
 	<version>0.1</version>
 	<packaging>jar</packaging>
 
-	<name>log.producer</name>
+	<name>log-loghub-producer-inner</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
@@ -26,5 +26,5 @@
 			<version>0.3.0</version>
 		</dependency>
 	</dependencies>
-	<artifactId>sls-loghub-producer-inner</artifactId>
+	<artifactId>log-loghub-producer-inner</artifactId>
 </project>

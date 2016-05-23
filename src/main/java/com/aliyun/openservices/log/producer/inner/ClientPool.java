@@ -27,6 +27,7 @@ public class ClientPool
 	public Client updateClient(final ProjectConfig config)
 	{
 		Client client = new Client(config.endpoint, config.accessKeyId, config.accessKey);
+		client.setUserAgent("loghub-producer-java");
 		if(config.stsToken != null)
 		{
 			client.SetSecurityToken(config.stsToken);
