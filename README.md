@@ -18,8 +18,8 @@ maven工程中添加依赖：
 ```
 <dependency>
 	<groupId>com.aliyun</groupId>
-	<artifactId>sls-loghub-producer-inner</artifactId>
-	<version>0.1</version>
+	<artifactId>log-loghub-producer-inner</artifactId>
+	<version>0.2</version>
 </dependency>
 ```
 step 2：程序中配置ProducerConfig，其中各个参数说明如下。
