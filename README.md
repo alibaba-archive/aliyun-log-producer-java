@@ -13,7 +13,16 @@ log producer解决上面问题的方法是会将日志merge到一定数量才真
 ## 使用方法
 producer使用分为以下几个步骤：
 
-step 1：程序中配置ProducerConfig，其中各个参数说明如下。
+step 1:
+maven工程中添加依赖：
+```
+<dependency>
+	<groupId>com.aliyun</groupId>
+	<artifactId>log-loghub-producer-inner</artifactId>
+	<version>0.2</version>
+</dependency>
+```
+step 2：程序中配置ProducerConfig，其中各个参数说明如下。
 ```java
 public class ProducerConfig 
 {
@@ -35,25 +44,14 @@ public class ProducerConfig
 	public int retryTimes = 3;
 }
 ```
-step 2：继承ILogCallback，callback主要用于日志发送结果的处理，结果包括发送成功和发生异常。用户也可以选择不处理，这样就不需要继承ILogCallback。
+step 3：继承ILogCallback，callback主要用于日志发送结果的处理，结果包括发送成功和发生异常。用户也可以选择不处理，这样就不需要继承ILogCallback。
 
-step 3：创建producer实例，调用send接口发数据。
+step 4：创建producer实例，调用send接口发数据。
 
 下面是一个完整的示例。
 ### 示例
 main:
 ```java
-package com.alibaba.openservices.log.producer.sample;
-
-import java.util.Date;
-import java.util.Random;
-import java.util.Vector;
-
-import com.alibaba.openservices.log.producer.LogProducer;
-import com.alibaba.openservices.log.producer.ProducerConfig;
-import com.alibaba.openservices.log.producer.ProjectConfig;
-import com.aliyun.openservices.log.common.LogItem;
-
 public class ProducerSample {
 	private final static int ThreadsCount = 25;
 
@@ -123,16 +121,6 @@ public class ProducerSample {
 ```
 callback:
 ```java
-package com.alibaba.openservices.log.producer.sample;
-
-import java.util.Vector;
-
-import com.alibaba.openservices.log.producer.ILogCallback;
-import com.alibaba.openservices.log.producer.LogProducer;
-import com.aliyun.openservices.log.common.LogItem;
-import com.aliyun.openservices.log.exception.LogException;
-import com.aliyun.openservices.log.response.PutLogsResponse;
-
 public class CallbackSample implements ILogCallback {
     //保存要发送的数据，当时发生异常时，进行重试
 	public String project;
