@@ -8,7 +8,7 @@ log producer解决上面问题的方法是会将日志merge到一定数量才真
 2. 可以添加多个project的配置。
 3. 用于发送的网络IO线程数量可以配置。
 4. merge成的包的日志数量以及大小都可以配置。
-5. 内存使用可控，当内存使用达到用户配置的阈值时，producer的send接口会阻塞，直到有空余的内存可用。
+5. 内存使用可控，当内存使用达到用户配置的阈值时，producer的send接口会阻塞，直到有空闲的内存可用。
 
 ## 使用方法
 producer使用分为以下几个步骤：
@@ -35,7 +35,7 @@ public class ProducerConfig
 	public int retryTimes = 3;
 }
 ```
-step 2：继承ILogCallback，callback主要用于日志发送结果的处理，结果包括发送成功和发生异常。用户也可以选择不处理，这样就不需要继承ILogCallback，定制自己的处理逻辑。
+step 2：继承ILogCallback，callback主要用于日志发送结果的处理，结果包括发送成功和发生异常。用户也可以选择不处理，这样就不需要继承ILogCallback。
 
 step 3：创建producer实例，调用send接口发数据。
 
@@ -112,6 +112,8 @@ public class ProducerSample {
 			}, i + "");
 			threads[i].start();
 		}
+		//等待发送线程退出
+		Thread.sleep(1 * 60 * 60 * 1000);
 		//主动刷新缓存起来的还没有被发送的日志
 		producer.flush();
 		//关闭后台io线程
@@ -132,6 +134,7 @@ import com.aliyun.openservices.log.exception.LogException;
 import com.aliyun.openservices.log.response.PutLogsResponse;
 
 public class CallbackSample implements ILogCallback {
+    //保存要发送的数据，当时发生异常时，进行重试
 	public String project;
 	public String logstore;
 	public String topic;
@@ -154,7 +157,9 @@ public class CallbackSample implements ILogCallback {
 
 	public void onCompletion(PutLogsResponse response, LogException e) {
 		if (e != null) {
+		    // 打印异常
 			System.out.println(e.GetErrorCode() + ", " + e.GetErrorMessage() + ", " + e.GetRequestId());
+			//最多重试三次
 			if(retryTimes++ < 3)
 			{
 				producer.send(project, logstore, topic, source, shardHash, items, this);
