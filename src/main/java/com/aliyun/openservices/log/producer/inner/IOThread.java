@@ -1,12 +1,12 @@
-package com.alibaba.openservices.log.producer.inner;
+package com.aliyun.openservices.log.producer.inner;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import com.alibaba.openservices.log.producer.ProducerConfig;
 import com.aliyun.openservices.log.Client;
 import com.aliyun.openservices.log.exception.LogException;
+import com.aliyun.openservices.log.producer.ProducerConfig;
 import com.aliyun.openservices.log.response.PutLogsResponse;
 
 class BlockedData {

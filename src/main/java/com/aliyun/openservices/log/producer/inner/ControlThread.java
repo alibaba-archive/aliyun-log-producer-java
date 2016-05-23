@@ -1,6 +1,6 @@
-package com.alibaba.openservices.log.producer.inner;
+package com.aliyun.openservices.log.producer.inner;
 
-import com.alibaba.openservices.log.producer.ProducerConfig;
+import com.aliyun.openservices.log.producer.ProducerConfig;
 
 public class ControlThread implements Runnable {
 	private ShardHashManager shardHashManager;

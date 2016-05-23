@@ -1,11 +1,11 @@
-package com.alibaba.openservices.log.producer.sample;
+package com.aliyun.openservices.log.producer.sample;
 
 import java.util.Vector;
 
-import com.alibaba.openservices.log.producer.ILogCallback;
-import com.alibaba.openservices.log.producer.LogProducer;
 import com.aliyun.openservices.log.common.LogItem;
 import com.aliyun.openservices.log.exception.LogException;
+import com.aliyun.openservices.log.producer.ILogCallback;
+import com.aliyun.openservices.log.producer.LogProducer;
 import com.aliyun.openservices.log.response.PutLogsResponse;
 
 public class CallbackSample implements ILogCallback {

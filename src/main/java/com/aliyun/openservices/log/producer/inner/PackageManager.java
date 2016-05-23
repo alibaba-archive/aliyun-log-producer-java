@@ -1,4 +1,4 @@
-package com.alibaba.openservices.log.producer.inner;
+package com.aliyun.openservices.log.producer.inner;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,10 +9,10 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.alibaba.openservices.log.producer.ProducerConfig;
-import com.alibaba.openservices.log.producer.ILogCallback;
 import com.aliyun.openservices.log.common.LogContent;
 import com.aliyun.openservices.log.common.LogItem;
+import com.aliyun.openservices.log.producer.ILogCallback;
+import com.aliyun.openservices.log.producer.ProducerConfig;
 
 public class PackageManager {
 	private ReadWriteLock metaRWLock = new ReentrantReadWriteLock();

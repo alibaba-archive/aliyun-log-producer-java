@@ -1,10 +1,10 @@
-package com.alibaba.openservices.log.producer;
+package com.aliyun.openservices.log.producer;
 
 import java.util.List;
 
-import com.alibaba.openservices.log.producer.inner.ClientPool;
-import com.alibaba.openservices.log.producer.inner.PackageManager;
 import com.aliyun.openservices.log.common.LogItem;
+import com.aliyun.openservices.log.producer.inner.ClientPool;
+import com.aliyun.openservices.log.producer.inner.PackageManager;
 
 public class LogProducer 
 {

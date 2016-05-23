@@ -1,13 +1,13 @@
-package com.alibaba.openservices.log.producer.sample;
+package com.aliyun.openservices.log.producer.sample;
 
 import java.util.Date;
 import java.util.Random;
 import java.util.Vector;
 
-import com.alibaba.openservices.log.producer.LogProducer;
-import com.alibaba.openservices.log.producer.ProducerConfig;
-import com.alibaba.openservices.log.producer.ProjectConfig;
 import com.aliyun.openservices.log.common.LogItem;
+import com.aliyun.openservices.log.producer.LogProducer;
+import com.aliyun.openservices.log.producer.ProducerConfig;
+import com.aliyun.openservices.log.producer.ProjectConfig;
 
 public class ProducerSample {
 	private final static int ThreadsCount = 25;
@@ -67,6 +67,8 @@ public class ProducerSample {
 			}, i + "");
 			threads[i].start();
 		}
+		//等待发送线程退出
+		Thread.sleep(1 * 60 * 60 * 1000);
 		//主动刷新缓存起来的还没有被发送的日志
 		producer.flush();
 		//关闭后台io线程

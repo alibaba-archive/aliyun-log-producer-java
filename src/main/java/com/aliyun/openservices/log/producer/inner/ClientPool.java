@@ -1,11 +1,11 @@
-package com.alibaba.openservices.log.producer.inner;
+package com.aliyun.openservices.log.producer.inner;
 
 import java.util.HashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.alibaba.openservices.log.producer.ProjectConfig;
 import com.aliyun.openservices.log.Client;
+import com.aliyun.openservices.log.producer.ProjectConfig;
 
 public class ClientPool 
 {

@@ -1,4 +1,4 @@
-package com.alibaba.openservices.log.producer.inner;
+package com.aliyun.openservices.log.producer.inner;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,10 +6,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.alibaba.openservices.log.producer.ProducerConfig;
 import com.aliyun.openservices.log.Client;
 import com.aliyun.openservices.log.common.Shard;
 import com.aliyun.openservices.log.exception.LogException;
+import com.aliyun.openservices.log.producer.ProducerConfig;
 
 class ShardHash {
 	public long updateTime;

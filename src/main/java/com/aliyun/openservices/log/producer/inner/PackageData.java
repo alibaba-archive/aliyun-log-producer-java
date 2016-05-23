@@ -1,11 +1,11 @@
-package com.alibaba.openservices.log.producer.inner;
+package com.aliyun.openservices.log.producer.inner;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import com.alibaba.openservices.log.producer.ILogCallback;
 import com.aliyun.openservices.log.common.LogItem;
 import com.aliyun.openservices.log.exception.LogException;
+import com.aliyun.openservices.log.producer.ILogCallback;
 import com.aliyun.openservices.log.response.PutLogsResponse;
 
 class PackageData 

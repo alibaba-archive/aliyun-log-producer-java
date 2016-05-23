@@ -1,4 +1,4 @@
-package com.alibaba.openservices.log.producer;
+package com.aliyun.openservices.log.producer;
 
 import com.aliyun.openservices.log.exception.LogException;
 import com.aliyun.openservices.log.response.PutLogsResponse;

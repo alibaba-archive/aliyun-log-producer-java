@@ -1,4 +1,4 @@
-package com.alibaba.openservices.log.producer.inner;
+package com.aliyun.openservices.log.producer.inner;
 
 import java.util.concurrent.locks.ReentrantLock;
 
