@@ -29,6 +29,10 @@ public class LogProducer
 	{
 		manager.add(project, logStore, topic, shardHash, source, logItems, callabck);
 	}
+	public void send(String project, String logStore, String topic, String shardHash, String source, List<LogItem> logItems)
+	{
+		manager.add(project, logStore, topic, shardHash, source, logItems, null);
+	}
 	public void send(String project, String logStore, String topic, String source, List<LogItem> logItems, ILogCallback callabck)
 	{
 		manager.add(project, logStore, topic, null, source, logItems, callabck);
