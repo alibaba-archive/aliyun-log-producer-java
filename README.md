@@ -12,6 +12,7 @@ log producer解决上面问题的方法是会将日志merge到一定数量才真
 
 ## 使用方法
 producer使用分为以下几个步骤：
+
 step 1:
 maven工程中添加依赖：
 ```
