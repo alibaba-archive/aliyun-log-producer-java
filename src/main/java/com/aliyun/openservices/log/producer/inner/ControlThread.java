@@ -21,10 +21,7 @@ public class ControlThread implements Runnable {
 
 	public void stop() {
 		stop = true;
-		try {
-			thread.join(20 * 1000);
-		} catch (InterruptedException e) {
-		}
+		thread.interrupt();
 	}
 
 	public void run() {
