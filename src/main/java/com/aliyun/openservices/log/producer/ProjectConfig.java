@@ -6,7 +6,9 @@ public class ProjectConfig {
 	public String accessKeyId;
 	public String accessKey;
 	public String stsToken;
-
+	
+	public ProjectConfig()
+	{}
 	public ProjectConfig(String projectName, String endpoint,
 			String accessKeyId, String accessKey, String stsToken) {
 		super();
