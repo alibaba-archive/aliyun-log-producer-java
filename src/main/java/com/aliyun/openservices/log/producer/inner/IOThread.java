@@ -5,8 +5,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import com.aliyun.openservices.log.Client;
+import com.aliyun.openservices.log.common.Consts;
 import com.aliyun.openservices.log.exception.LogException;
 import com.aliyun.openservices.log.producer.ProducerConfig;
+import com.aliyun.openservices.log.request.PutLogsRequest;
 import com.aliyun.openservices.log.response.PutLogsResponse;
 
 class BlockedData {
@@ -78,15 +80,14 @@ class IOThread implements Runnable {
 				try {
 					if (bd.data.shardHash != null
 							&& !bd.data.shardHash.isEmpty()) {
-
-						response = clt.PutLogs(bd.data.project,
-								bd.data.logstore, bd.data.topic, bd.data.items,
-								bd.data.source, bd.data.shardHash);
+						PutLogsRequest request = new PutLogsRequest(bd.data.project, bd.data.logstore, bd.data.topic, bd.data.source, bd.data.items, bd.data.shardHash);
+						request.setContentType(config.logsFormat == "protobuf" ? Consts.CONST_PROTO_BUF : Consts.CONST_SLS_JSON);
+						response = clt.PutLogs(request);
 
 					} else {
-						response = clt.PutLogs(bd.data.project,
-								bd.data.logstore, bd.data.topic, bd.data.items,
-								bd.data.source);
+						PutLogsRequest request = new PutLogsRequest(bd.data.project, bd.data.logstore, bd.data.topic, bd.data.source, bd.data.items);
+						request.setContentType(config.logsFormat == "protobuf" ? Consts.CONST_PROTO_BUF : Consts.CONST_SLS_JSON);
+						response = clt.PutLogs(request);
 					}
 					break;
 				} catch (LogException e) {
