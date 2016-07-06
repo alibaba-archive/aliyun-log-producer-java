@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>com.aliyun.openservices</groupId>
 			<artifactId>aliyun-log</artifactId>
-			<version>0.6.4</version>
+			<version>0.6.5</version>
 		</dependency>
 	</dependencies>
 
