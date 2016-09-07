@@ -5,7 +5,7 @@ import com.aliyun.openservices.log.common.Consts;
 public class ProducerConfig 
 {
 	//被缓存起来的日志的发送超时时间，如果缓存超时，则会被立即发送，单位是毫秒
-	public int packageTimeoutInMS = 50000;
+	public int packageTimeoutInMS = 3000;
 	//每个缓存的日志包中包含日志数量的最大值，不能超过4096
 	public int logsCountPerPackage = 4096;
 	//每个缓存的日志包的大小的上限，不能超过5MB，单位是字节
