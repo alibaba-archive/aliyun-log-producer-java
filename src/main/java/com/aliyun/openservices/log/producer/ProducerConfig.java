@@ -1,7 +1,5 @@
 package com.aliyun.openservices.log.producer;
 
-import com.aliyun.openservices.log.common.Consts;
-
 public class ProducerConfig 
 {
 	//被缓存起来的日志的发送超时时间，如果缓存超时，则会被立即发送，单位是毫秒
@@ -12,8 +10,6 @@ public class ProducerConfig
 	public int logsBytesPerPackage = 5 * 1024 * 1024;
 	//单个producer实例可以使用的内存的上限，单位是字节
 	public int memPoolSizeInByte = 100 * 1024 * 1024;
-	//后台用于发送日志包的IO线程的数量
-	public int ioThreadsCount = 1;
 	//当使用指定shardhash的方式发送日志时，这个参数需要被设置，否则不需要关心。后端merge线程会将映射到同一个shard的数据merge在一起，而shard关联的是一个hash区间，
 	//producer在处理时会将用户传入的hash映射成shard关联hash区间的最小值。每一个shard关联的hash区间，producer会定时从从loghub拉取，该参数的含义是每隔shardHashUpdateIntervalInMS毫秒，
 	//更新一次shard的hash区间。

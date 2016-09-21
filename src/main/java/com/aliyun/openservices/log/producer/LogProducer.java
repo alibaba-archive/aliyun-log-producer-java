@@ -49,4 +49,11 @@ public class LogProducer
 	{
 		manager.close();
 	}
+	public ProducerConfig getProducerConfig() {
+		return producerConfig;
+	}
+	public void setProducerConfig(ProducerConfig producerConfig) {
+		this.producerConfig = producerConfig;
+	}
+	
 }

@@ -40,10 +40,35 @@ class PackageData
 		items.clear();
 		callbacks.clear();
 	}
-	public void callback(PutLogsResponse response, LogException e)
+	public void markAddToIOBeginTime()
 	{
+		long curr = System.currentTimeMillis();
+		for(ILogCallback cb: callbacks){
+			cb.addToIOQueueBeginTimeInMillis = curr;
+		}
+	}
+	public void markAddToIOEndTime()
+	{
+		long curr = System.currentTimeMillis();
+		for(ILogCallback cb: callbacks){
+			cb.addToIOQueueEndTimeInMillis = curr;
+		}
+	}
+	public void markCompleteIOBeginTimeInMillis(final int queueSize)
+	{
+		long curr = System.currentTimeMillis();
+		for(ILogCallback cb: callbacks){
+			cb.completeIOBeginTimeInMillis = curr;
+			cb.ioQueueSize = queueSize;
+		}
+	}
+	public void callback(PutLogsResponse response, LogException e, float srcOutFlow)
+	{
+		long curr = System.currentTimeMillis();
 		for(ILogCallback cb: callbacks)
 		{
+			cb.completeIOEndTimeInMillis = curr;
+			cb.sendBytesPerSecond = srcOutFlow;
 			cb.onCompletion(response, e);
 		}
 	}

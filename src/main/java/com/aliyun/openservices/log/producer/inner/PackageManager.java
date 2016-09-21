@@ -23,7 +23,6 @@ public class PackageManager {
 	private IOThread ioThread;
 	private ControlThread controlThread;
 	private ShardHashManager shardHashManager;
-
 	public PackageManager(ProducerConfig config, ClientPool pool) {
 		super();
 		this.config = config;
@@ -58,7 +57,8 @@ public class PackageManager {
 		for (Entry<String, PackageMeta> entry : metaMap.entrySet()) {
 			PackageMeta meta = entry.getValue();
 			meta.lock.lock();
-			if (System.currentTimeMillis() - meta.arriveTimeInMS >= config.packageTimeoutInMS) {
+			long currTime = System.currentTimeMillis();
+			if ((currTime - meta.arriveTimeInMS) >= config.packageTimeoutInMS) {
 				PackageData data = dataMap.remove(entry.getKey());
 				if (meta.logLinesCount > 0) {
 					ioThread.addPackage(data, meta.packageBytes,
@@ -98,7 +98,10 @@ public class PackageManager {
 
 	public void add(String project, String logStore, String topic,
 			String shardHash, String source, List<LogItem> logItems,
-			ILogCallback callabck) {
+			ILogCallback callback) {
+		if(callback != null){
+			callback.callSendBeginTimeInMillis = System.currentTimeMillis();
+		}
 		if (shardHash != null) {
 			shardHash = shardHashManager.getBeginHash(project, logStore,
 					shardHash);
@@ -144,9 +147,12 @@ public class PackageManager {
 			data = new PackageData(project, logStore, topic, shardHash, source);
 			dataMap.put(key, data);
 		}
-		data.addItems(logItems, callabck);
+		data.addItems(logItems, callback);
 		meta.logLinesCount += linesCount;
 		meta.packageBytes += logBytes;
 		meta.lock.unlock();
+		if(callback != null){
+			callback.callSendEndTimeInMillis = System.currentTimeMillis();
+		}
 	}
 }
