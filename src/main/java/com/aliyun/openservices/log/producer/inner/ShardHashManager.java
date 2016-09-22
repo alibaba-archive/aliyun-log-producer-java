@@ -1,6 +1,7 @@
 package com.aliyun.openservices.log.producer.inner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -93,8 +94,11 @@ public class ShardHashManager {
 				if (shards != null) {
 					h.hash = new ArrayList<String>();
 					for (Shard s : shards) {
-						h.hash.add(s.getInclusiveBeginKey());
+						if(s.getStatus().compareToIgnoreCase("readonly") != 0){
+							h.hash.add(s.getInclusiveBeginKey());
+						}
 					}
+					Collections.sort(h.hash);
 					h.updateTime = cur;
 				}
 			}
