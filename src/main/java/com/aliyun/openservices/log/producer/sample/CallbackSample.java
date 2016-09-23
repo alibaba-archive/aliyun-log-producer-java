@@ -8,7 +8,7 @@ import com.aliyun.openservices.log.producer.ILogCallback;
 import com.aliyun.openservices.log.producer.LogProducer;
 import com.aliyun.openservices.log.response.PutLogsResponse;
 
-public class CallbackSample implements ILogCallback {
+public class CallbackSample extends ILogCallback {
 	public String project;
 	public String logstore;
 	public String topic;
@@ -16,9 +16,10 @@ public class CallbackSample implements ILogCallback {
 	public String source;
 	public Vector<LogItem> items;
 	public LogProducer producer;
-	public int retryTimes = 0;
+
 	public CallbackSample(String project, String logstore, String topic,
-			String shardHash, String source, Vector<LogItem> items, LogProducer producer) {
+			String shardHash, String source, Vector<LogItem> items,
+			LogProducer producer) {
 		super();
 		this.project = project;
 		this.logstore = logstore;
@@ -31,14 +32,14 @@ public class CallbackSample implements ILogCallback {
 
 	public void onCompletion(PutLogsResponse response, LogException e) {
 		if (e != null) {
-			System.out.println(e.GetErrorCode() + ", " + e.GetErrorMessage() + ", " + e.GetRequestId());
-			if(retryTimes++ < 3)
-			{
-				producer.send(project, logstore, topic, source, shardHash, items, this);
+			System.out.println(e.GetErrorCode() + ", " + e.GetErrorMessage()
+					+ ", " + e.GetRequestId() + toString());
+		} else {
+			
+			if ((completeIOEndTimeInMillis - callSendBeginTimeInMillis) > (producer.getProducerConfig().packageTimeoutInMS * 10)) {
+				System.out.println("send success, request id: "
+						+ response.GetRequestId() + toString());
 			}
-		}
-		else{
-			System.out.println("send success, request id: " + response.GetRequestId());
 		}
 	}
 
