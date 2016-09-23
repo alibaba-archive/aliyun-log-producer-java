@@ -18,5 +18,7 @@ public class ProducerConfig
 	public int retryTimes = 3;
 	//json
 	public String logsFormat = "protobuf";
+	//IO线程池最大线程数量
+	public int maxIOThreadSizeInPool = 50;
 	
 }

@@ -4,6 +4,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -26,7 +28,7 @@ class BlockedData {
 };
 
 class IOThread implements Runnable {
-	private ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+	private ExecutorService cachedThreadPool;
 	private Thread thread;
 	private String threadName = "log_producer_io_thread";
 	private BlockingQueue<BlockedData> dataQueue = new LinkedBlockingQueue<BlockedData>();
@@ -42,6 +44,7 @@ class IOThread implements Runnable {
 		this.clientPool = cltPool;
 		this.manager = man;
 		this.config = conf;
+		cachedThreadPool = new ThreadPoolExecutor(0, conf.maxIOThreadSizeInPool, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
 		this.thread = new Thread(null, this, threadName);
 		thread.start();
 	}
@@ -63,7 +66,9 @@ class IOThread implements Runnable {
 			try {
 				BlockedData bd = dataQueue.poll(config.packageTimeoutInMS / 2,
 						TimeUnit.MILLISECONDS);
-				sendData(bd);
+				if(bd != null){
+					sendData(bd);
+				}
 			} catch (InterruptedException e) {
 				break;
 			}
@@ -137,7 +142,10 @@ class IOThread implements Runnable {
 						}
 					});
 				}
-			} catch (InterruptedException e) {
+			} 
+			catch (InterruptedException e) {
+			}
+			catch(Exception ae){
 			}
 		}
 	}
