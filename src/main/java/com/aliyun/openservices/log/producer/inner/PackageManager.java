@@ -50,7 +50,10 @@ public class PackageManager {
 	void releaseBytes(final int b) {
 		semaphore.release(b);
 	}
-
+	public int availablePermits()
+	{
+		return semaphore.availablePermits();
+	}
 	void filterTimeoutPackage() {
 		ArrayList<String> timeoutList = new ArrayList<String>();
 		metaRWLock.writeLock().lock();

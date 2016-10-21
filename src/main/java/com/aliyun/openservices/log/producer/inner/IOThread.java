@@ -4,6 +4,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +45,9 @@ class IOThread implements Runnable {
 		this.clientPool = cltPool;
 		this.manager = man;
 		this.config = conf;
-		cachedThreadPool = new ThreadPoolExecutor(0, conf.maxIOThreadSizeInPool, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
+		cachedThreadPool = new ThreadPoolExecutor(0,
+				conf.maxIOThreadSizeInPool, 60L, TimeUnit.SECONDS,
+				new SynchronousQueue<Runnable>());
 		this.thread = new Thread(null, this, threadName);
 		thread.start();
 	}
@@ -66,7 +69,7 @@ class IOThread implements Runnable {
 			try {
 				BlockedData bd = dataQueue.poll(config.packageTimeoutInMS / 2,
 						TimeUnit.MILLISECONDS);
-				if(bd != null){
+				if (bd != null) {
 					sendData(bd);
 				}
 			} catch (InterruptedException e) {
@@ -136,16 +139,17 @@ class IOThread implements Runnable {
 						config.packageTimeoutInMS / 2, TimeUnit.MILLISECONDS);
 				if (bd != null) {
 					bd.data.markCompleteIOBeginTimeInMillis(dataQueue.size());
-					cachedThreadPool.submit(new Runnable() {
-						public void run() {
-							sendData(bd);
-						}
-					});
+					try {
+						cachedThreadPool.submit(new Runnable() {
+							public void run() {
+								sendData(bd);
+							}
+						});
+					} catch (RejectedExecutionException e) {
+						dataQueue.put(bd);
+					}
 				}
-			} 
-			catch (InterruptedException e) {
-			}
-			catch(Exception ae){
+			} catch (InterruptedException e) {
 			}
 		}
 	}

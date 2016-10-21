@@ -49,6 +49,10 @@ public class LogProducer
 	{
 		manager.close();
 	}
+	public int availablePermits()
+	{
+		return manager.availablePermits();
+	}
 	public ProducerConfig getProducerConfig() {
 		return producerConfig;
 	}
