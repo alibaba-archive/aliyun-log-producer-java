@@ -8,13 +8,14 @@ import com.aliyun.openservices.log.producer.inner.PackageManager;
 
 public class LogProducer 
 {
-	private ClientPool clientPool = new ClientPool();
+	private ClientPool clientPool;
 	private ProducerConfig producerConfig;
 	private PackageManager manager;
 	
 	public LogProducer(ProducerConfig producerConfig) {
 		super();
 		this.producerConfig = producerConfig;
+		this.clientPool = new ClientPool(producerConfig);
 		this.manager = new PackageManager(this.producerConfig, clientPool);
 	}
 	public void setProjectConfig(ProjectConfig config)

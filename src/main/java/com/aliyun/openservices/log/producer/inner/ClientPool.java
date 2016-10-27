@@ -5,6 +5,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.aliyun.openservices.log.Client;
+import com.aliyun.openservices.log.producer.ProducerConfig;
 import com.aliyun.openservices.log.producer.ProjectConfig;
 
 public class ClientPool 
@@ -23,11 +24,15 @@ public class ClientPool
 	private HashMap<String, String> projectEndpointMap = new HashMap<String, String>();
 	private HashMap<String, Pair> clientPool = new HashMap<String, Pair>();
 	private ReadWriteLock rwLock = new ReentrantReadWriteLock();
-	
+	private ProducerConfig producerConfig;
+	public ClientPool(ProducerConfig producerConfig)
+	{
+		this.producerConfig = producerConfig;
+	}
 	public Client updateClient(final ProjectConfig config)
 	{
 		Client client = new Client(config.endpoint, config.accessKeyId, config.accessKey);
-		client.setUserAgent("loghub-producer-java");
+		client.setUserAgent(producerConfig.userAgent);
 		if(config.stsToken != null)
 		{
 			client.SetSecurityToken(config.stsToken);

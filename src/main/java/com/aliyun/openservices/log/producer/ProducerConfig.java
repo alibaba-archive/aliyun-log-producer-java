@@ -20,5 +20,7 @@ public class ProducerConfig
 	public String logsFormat = "protobuf";
 	//IO线程池最大线程数量
 	public int maxIOThreadSizeInPool = 50;
+	//userAgent
+	public String userAgent = "loghub-producer-java";
 	
 }
