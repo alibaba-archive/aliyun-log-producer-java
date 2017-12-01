@@ -7,7 +7,7 @@ public class ProducerConfig
 	//每个缓存的日志包中包含日志数量的最大值，不能超过4096
 	public int logsCountPerPackage = 4096;
 	//每个缓存的日志包的大小的上限，不能超过5MB，单位是字节
-	public int logsBytesPerPackage = 5 * 1024 * 1024;
+	public int logsBytesPerPackage = 3 * 1024 * 1024;
 	//单个producer实例可以使用的内存的上限，单位是字节
 	public int memPoolSizeInByte = 100 * 1024 * 1024;
 	//当使用指定shardhash的方式发送日志时，这个参数需要被设置，否则不需要关心。后端merge线程会将映射到同一个shard的数据merge在一起，而shard关联的是一个hash区间，
@@ -19,8 +19,7 @@ public class ProducerConfig
 	//json
 	public String logsFormat = "protobuf";
 	//IO线程池最大线程数量
-	public int maxIOThreadSizeInPool = 50;
+	public int maxIOThreadSizeInPool = 8;
 	//userAgent
 	public String userAgent = "loghub-producer-java";
-	
 }

@@ -16,6 +16,7 @@ public class ControlThread implements Runnable {
 		this.manager = manager;
 		this.producerConfig = producerConfig;
 		thread = new Thread(null, this, "log_producer_control_thread");
+		thread.setDaemon(true);
 		thread.start();
 	}
 

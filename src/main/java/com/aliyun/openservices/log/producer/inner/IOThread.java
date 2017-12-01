@@ -1,17 +1,13 @@
 package com.aliyun.openservices.log.producer.inner;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.aliyun.openservices.log.Client;
 import com.aliyun.openservices.log.common.Consts;
+import com.aliyun.openservices.log.common.TagContent;
 import com.aliyun.openservices.log.exception.LogException;
 import com.aliyun.openservices.log.producer.ProducerConfig;
 import com.aliyun.openservices.log.request.PutLogsRequest;
@@ -42,14 +38,25 @@ class IOThread implements Runnable {
 
 	public IOThread(ClientPool cltPool, PackageManager man, ProducerConfig conf) {
 		super();
+
 		this.clientPool = cltPool;
 		this.manager = man;
 		this.config = conf;
 		cachedThreadPool = new ThreadPoolExecutor(0,
 				conf.maxIOThreadSizeInPool, 60L, TimeUnit.SECONDS,
-				new SynchronousQueue<Runnable>());
+				new SynchronousQueue<Runnable>(), new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable runnable) {
+				final AtomicLong threadCount = new AtomicLong(0);
+				Thread thread = new Thread(runnable);
+				thread.setName("producer-thread-" + threadCount.getAndIncrement());
+				thread.setDaemon(true);
+				return thread;
+			}
+		});
 		this.thread = new Thread(null, this, threadName);
-		thread.start();
+		this.thread.setDaemon(true);
+		this.thread.start();
 	}
 
 	public void addPackage(PackageData data, int bytes, int logLineCount) {
@@ -96,6 +103,9 @@ class IOThread implements Runnable {
 								bd.data.project, bd.data.logstore,
 								bd.data.topic, bd.data.source, bd.data.items,
 								bd.data.shardHash);
+						List<TagContent> tags = new ArrayList<TagContent>();
+						tags.add(new TagContent("__pack_id__", bd.data.getPackageId()));
+						request.SetTags(tags);
 						request.setContentType(config.logsFormat == "protobuf" ? Consts.CONST_PROTO_BUF
 								: Consts.CONST_SLS_JSON);
 						response = clt.PutLogs(request);
@@ -104,6 +114,9 @@ class IOThread implements Runnable {
 						PutLogsRequest request = new PutLogsRequest(
 								bd.data.project, bd.data.logstore,
 								bd.data.topic, bd.data.source, bd.data.items);
+						List<TagContent> tags = new ArrayList<TagContent>();
+						tags.add(new TagContent("__pack_id__", bd.data.getPackageId()));
+						request.SetTags(tags);
 						request.setContentType(config.logsFormat == "protobuf" ? Consts.CONST_PROTO_BUF
 								: Consts.CONST_SLS_JSON);
 						response = clt.PutLogs(request);

@@ -1,12 +1,23 @@
 package com.aliyun.openservices.log.producer.inner;
 
+import java.lang.management.ManagementFactory;
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
+import com.aliyun.openservices.log.common.Consts;
 import com.aliyun.openservices.log.common.LogItem;
 import com.aliyun.openservices.log.exception.LogException;
 import com.aliyun.openservices.log.producer.ILogCallback;
 import com.aliyun.openservices.log.response.PutLogsResponse;
+import org.apache.commons.validator.routines.InetAddressValidator;
 
 class PackageData 
 {
@@ -15,8 +26,66 @@ class PackageData
 	public String topic;
 	public String shardHash;
 	public String source;
+	public String packageId;
 	public LinkedList<LogItem> items = new LinkedList<LogItem>();
 	public LinkedList<ILogCallback> callbacks = new LinkedList<ILogCallback>();
+
+	public static String contextHash;
+	public static AtomicLong contextOrder = new AtomicLong(0);
+
+	static String GetLocalMachineIp() {
+		InetAddressValidator validator = new InetAddressValidator();
+		String candidate = new String();
+		try {
+			for (Enumeration<NetworkInterface> ifaces = NetworkInterface
+					.getNetworkInterfaces(); ifaces.hasMoreElements();) {
+				NetworkInterface iface = ifaces.nextElement();
+
+				if (iface.isUp()) {
+					for (Enumeration<InetAddress> addresses = iface
+							.getInetAddresses(); addresses.hasMoreElements();) {
+
+						InetAddress address = addresses.nextElement();
+
+						if (address.isLinkLocalAddress() == false
+								&& address.getHostAddress() != null) {
+							String ipAddress = address.getHostAddress();
+							if (ipAddress.equals(Consts.CONST_LOCAL_IP)) {
+								continue;
+							}
+							if (validator.isValidInet4Address(ipAddress)) {
+								return ipAddress;
+							}
+							if (validator.isValid(ipAddress)) {
+								candidate = ipAddress;
+							}
+						}
+					}
+				}
+			}
+		} catch (SocketException e) {
+		}
+		return candidate;
+	}
+
+	static{
+		String candidate = GetLocalMachineIp() + "-" + ManagementFactory.getRuntimeMXBean().getName();
+		try {
+			MessageDigest m = MessageDigest.getInstance("MD5");
+			m.reset();
+			m.update(candidate.getBytes());
+			byte[] digest = m.digest();
+			BigInteger bigInt = new BigInteger(1,digest);
+			contextHash = bigInt.toString(16).toUpperCase();
+			if(contextHash.length() > 16) contextHash = contextHash.substring(0, 16);
+			else if(contextHash.length() < 16) {
+				while (contextHash.length() < 16) contextHash = "0" + contextHash;
+			}
+		} catch (NoSuchAlgorithmException e) {
+		}
+
+	}
+
 	public PackageData(String project, String logstore, String topic,
 			String shardHash, String source) {
 		super();
@@ -25,6 +94,7 @@ class PackageData
 		this.topic = topic;
 		this.shardHash = shardHash;
 		this.source = source;
+		this.packageId = contextHash + "-" + Long.toHexString(contextOrder.incrementAndGet()).toUpperCase();
 	}
 	
 	public void addItems(List<LogItem> logItems, ILogCallback callabck)
@@ -71,5 +141,13 @@ class PackageData
 			cb.sendBytesPerSecond = srcOutFlow;
 			cb.onCompletion(response, e);
 		}
+	}
+
+	public String getPackageId() {
+		return packageId;
+	}
+
+	public void setPackageId(String packageId) {
+		this.packageId = packageId;
 	}
 }
