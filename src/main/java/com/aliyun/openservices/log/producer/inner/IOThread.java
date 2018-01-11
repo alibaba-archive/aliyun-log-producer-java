@@ -30,9 +30,12 @@ class IOThread implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IOThread.class);
 
+    private static final String IO_THREAD_NAME = "log_producer_io_thread";
+
+    private static final String POOL_THREAD_NAME_PREFIX = "producer-thread-";
+
     private ExecutorService cachedThreadPool;
     private Thread thread;
-    private String threadName = "log_producer_io_thread";
     private BlockingQueue<BlockedData> dataQueue = new LinkedBlockingQueue<BlockedData>();
     private ClientPool clientPool;
     private PackageManager manager;
@@ -54,12 +57,12 @@ class IOThread implements Runnable {
             public Thread newThread(Runnable runnable) {
                 final AtomicLong threadCount = new AtomicLong(0);
                 Thread thread = new Thread(runnable);
-                thread.setName("producer-thread-" + threadCount.getAndIncrement());
+                thread.setName(POOL_THREAD_NAME_PREFIX + threadCount.getAndIncrement());
                 thread.setDaemon(true);
                 return thread;
             }
         });
-        this.thread = new Thread(null, this, threadName);
+        this.thread = new Thread(null, this, IO_THREAD_NAME);
         this.thread.setDaemon(true);
         this.thread.start();
     }
@@ -90,7 +93,7 @@ class IOThread implements Runnable {
         }
     }
 
-    protected void sendData(BlockedData bd) {
+    private void sendData(BlockedData bd) {
         try {
             doSendData(bd);
         } catch (Exception e) {
@@ -153,14 +156,16 @@ class IOThread implements Runnable {
         manager.releaseBytes(bd.bytes);
     }
 
+    @Override
     public void run() {
-        while (!stop) {
-            long currTime = System.currentTimeMillis();
-            if ((currTime - sendLogTimeWindowInMillis.get()) > 60 * 1000) {
-                sendLogBytes.set(0L);
-                sendLogTimeWindowInMillis.set(currTime);
-            }
-            try {
+        try {
+            while (!stop) {
+                long currTime = System.currentTimeMillis();
+                if ((currTime - sendLogTimeWindowInMillis.get()) > 60 * 1000) {
+                    sendLogBytes.set(0L);
+                    sendLogTimeWindowInMillis.set(currTime);
+                }
+
                 final BlockedData bd = dataQueue.poll(
                         config.packageTimeoutInMS / 2, TimeUnit.MILLISECONDS);
                 if (bd != null) {
@@ -175,8 +180,9 @@ class IOThread implements Runnable {
                         dataQueue.put(bd);
                     }
                 }
-            } catch (InterruptedException e) {
             }
+        } catch (Exception e) {
+            LOGGER.error("Exception happened in IOThread, e=", e);
         }
     }
 }
