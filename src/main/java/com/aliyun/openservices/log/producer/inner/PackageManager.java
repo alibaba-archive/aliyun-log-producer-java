@@ -27,7 +27,7 @@ public class PackageManager {
 		super();
 		this.config = config;
 		semaphore = new Semaphore(config.memPoolSizeInByte);
-		ioThread = new IOThread(pool, this, config);
+		ioThread = IOThread.launch(pool, this, config);
 		shardHashManager = new ShardHashManager(pool, config);
 		controlThreadPool = ControlThreadPool.launch(shardHashManager, this, config);
 	}
@@ -64,8 +64,7 @@ public class PackageManager {
 			if ((currTime - meta.arriveTimeInMS) >= config.packageTimeoutInMS) {
 				PackageData data = dataMap.remove(entry.getKey());
 				if (meta.logLinesCount > 0) {
-					ioThread.addPackage(data, meta.packageBytes,
-							meta.logLinesCount);
+					ioThread.addPackage(data, meta.packageBytes);
 				}
 				timeoutList.add(entry.getKey());
 			}
@@ -84,7 +83,7 @@ public class PackageManager {
 			PackageMeta meta = entry.getValue();
 			meta.lock.lock();
 			PackageData data = dataMap.remove(entry.getKey());
-			ioThread.addPackage(data, meta.packageBytes, meta.logLinesCount);
+			ioThread.addPackage(data, meta.packageBytes);
 			meta.lock.unlock();
 			timeoutList.add(entry.getKey());
 		}
@@ -96,12 +95,12 @@ public class PackageManager {
 
 	public void close() {
 		controlThreadPool.shutdown();
-		ioThread.stop();
+		ioThread.shutdown();
 	}
 
 	public void closeNow() {
 		controlThreadPool.shutdownNow();
-		ioThread.stop();
+		ioThread.shutdownNow();
 	}
 
 	public void add(String project, String logStore, String topic,
@@ -145,7 +144,7 @@ public class PackageManager {
 				&& (meta.logLinesCount + linesCount >= config.logsCountPerPackage
 						|| meta.packageBytes + logBytes >= config.logsBytesPerPackage || System
 						.currentTimeMillis() - meta.arriveTimeInMS >= config.packageTimeoutInMS)) {
-			ioThread.addPackage(data, meta.packageBytes, meta.logLinesCount);
+			ioThread.addPackage(data, meta.packageBytes);
 			dataMap.remove(key);
 			data = null;
 			meta.clear();

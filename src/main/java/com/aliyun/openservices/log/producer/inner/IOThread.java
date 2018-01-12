@@ -2,6 +2,7 @@ package com.aliyun.openservices.log.producer.inner;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -16,88 +17,88 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class BlockedData {
-    public PackageData data;
-    public int bytes;
+    PackageData data;
+    int bytes;
 
-    public BlockedData(PackageData data, int bytes) {
+    BlockedData(PackageData data, int bytes) {
         super();
         this.data = data;
         this.bytes = bytes;
     }
 };
 
-class IOThread implements Runnable {
+class IOThread extends Thread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IOThread.class);
 
-    private static final String IO_THREAD_NAME = "log_producer_io_thread";
+    private static final String IO_THREAD_NAME = "log-producer-io-thread";
 
-    private static final String POOL_THREAD_NAME_PREFIX = "producer-thread-";
+    private static final String IO_WORKER_BASE_NAME = "log-producer-io-worker-";
 
     private ExecutorService cachedThreadPool;
-    private Thread thread;
     private BlockingQueue<BlockedData> dataQueue = new LinkedBlockingQueue<BlockedData>();
     private ClientPool clientPool;
-    private PackageManager manager;
-    private ProducerConfig config;
-    private boolean stop = false;
+    private PackageManager packageManager;
+    private ProducerConfig producerConfig;
     private AtomicLong sendLogBytes = new AtomicLong(0L);
     private AtomicLong sendLogTimeWindowInMillis = new AtomicLong(0L);
 
-    public IOThread(ClientPool cltPool, PackageManager man, ProducerConfig conf) {
-        super();
-
-        this.clientPool = cltPool;
-        this.manager = man;
-        this.config = conf;
-        cachedThreadPool = new ThreadPoolExecutor(0,
-                conf.maxIOThreadSizeInPool, 60L, TimeUnit.SECONDS,
-                new SynchronousQueue<Runnable>(), new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable runnable) {
-                final AtomicLong threadCount = new AtomicLong(0);
-                Thread thread = new Thread(runnable);
-                thread.setName(POOL_THREAD_NAME_PREFIX + threadCount.getAndIncrement());
-                thread.setDaemon(true);
-                return thread;
-            }
-        });
-        this.thread = new Thread(null, this, IO_THREAD_NAME);
-        this.thread.setDaemon(true);
-        this.thread.start();
+    public static IOThread launch(ClientPool cltPool, PackageManager packageManager,
+                                  ProducerConfig producerConfig) {
+        IOThread ioThread = new IOThread(cltPool, packageManager, producerConfig);
+        ioThread.setName(IO_THREAD_NAME);
+        ioThread.setDaemon(true);
+        ioThread.start();
+        return ioThread;
     }
 
-    public void addPackage(PackageData data, int bytes, int logLineCount) {
+    private IOThread(ClientPool cltPool, PackageManager packageManager,
+                    ProducerConfig producerConfig) {
+        this.clientPool = cltPool;
+        this.packageManager = packageManager;
+        this.producerConfig = producerConfig;
+        cachedThreadPool = new ThreadPoolExecutor(0,
+                producerConfig.maxIOThreadSizeInPool, 60L, TimeUnit.SECONDS,
+                new SynchronousQueue<Runnable>(), new NamedThreadFactory(IO_WORKER_BASE_NAME));
+    }
+
+    public void addPackage(PackageData data, int bytes) {
         data.markAddToIOBeginTime();
         try {
             dataQueue.put(new BlockedData(data, bytes));
         } catch (InterruptedException e) {
+            LOGGER.error("Failed to put data into dataQueue.", e);
         }
         data.markAddToIOEndTime();
     }
 
-    public void stop() {
-        stop = true;
-        thread.interrupt();
+    public void shutdown() {
+        this.interrupt();
         cachedThreadPool.shutdown();
         while (!dataQueue.isEmpty()) {
+            BlockedData bd = null;
             try {
-                BlockedData bd = dataQueue.poll(config.packageTimeoutInMS / 2,
-                        TimeUnit.MILLISECONDS);
-                if (bd != null) {
-                    sendData(bd);
-                }
+                bd = dataQueue.poll(producerConfig.packageTimeoutInMS / 2, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
+                LOGGER.error("Failed to poll data from dataQueue.", e);
                 break;
             }
+            if (bd != null) {
+                sendData(bd);
+            }
         }
+    }
+
+    public void shutdownNow() {
+        this.interrupt();
+        cachedThreadPool.shutdownNow();
     }
 
     private void sendData(BlockedData bd) {
         try {
             doSendData(bd);
         } catch (Exception e) {
-            LOGGER.error("Failed to send data. e=", e);
+            LOGGER.error("Failed to send data.", e);
         }
     }
 
@@ -111,7 +112,7 @@ class IOThread implements Runnable {
             int retry = 0;
             LogException excep = null;
             PutLogsResponse response = null;
-            while (retry++ <= config.retryTimes) {
+            while (retry++ <= producerConfig.retryTimes) {
                 try {
                     if (bd.data.shardHash != null
                             && !bd.data.shardHash.isEmpty()) {
@@ -122,7 +123,8 @@ class IOThread implements Runnable {
                         List<TagContent> tags = new ArrayList<TagContent>();
                         tags.add(new TagContent("__pack_id__", bd.data.getPackageId()));
                         request.SetTags(tags);
-                        request.setContentType(config.logsFormat.equals("protobuf") ? Consts.CONST_PROTO_BUF
+                        request.setContentType(producerConfig.logsFormat.equals("protobuf") ?
+                                Consts.CONST_PROTO_BUF
                                 : Consts.CONST_SLS_JSON);
                         response = clt.PutLogs(request);
 
@@ -133,7 +135,8 @@ class IOThread implements Runnable {
                         List<TagContent> tags = new ArrayList<TagContent>();
                         tags.add(new TagContent("__pack_id__", bd.data.getPackageId()));
                         request.SetTags(tags);
-                        request.setContentType(config.logsFormat.equals("protobuf") ? Consts.CONST_PROTO_BUF
+                        request.setContentType(producerConfig.logsFormat.equals("protobuf") ?
+                                Consts.CONST_PROTO_BUF
                                 : Consts.CONST_SLS_JSON);
                         response = clt.PutLogs(request);
                     }
@@ -153,21 +156,29 @@ class IOThread implements Runnable {
                 outflow = sendLogBytes.get() / sec;
             bd.data.callback(response, excep, outflow);
         }
-        manager.releaseBytes(bd.bytes);
+        packageManager.releaseBytes(bd.bytes);
     }
 
     @Override
     public void run() {
         try {
-            while (!stop) {
-                long currTime = System.currentTimeMillis();
-                if ((currTime - sendLogTimeWindowInMillis.get()) > 60 * 1000) {
-                    sendLogBytes.set(0L);
-                    sendLogTimeWindowInMillis.set(currTime);
-                }
+            handleBlockedData();
+        } catch (Exception e) {
+            LOGGER.error("Failed to handle BlockedData.", e);
+        }
+    }
 
+    private void handleBlockedData() {
+        while (!isInterrupted()) {
+            long currTime = System.currentTimeMillis();
+            if ((currTime - sendLogTimeWindowInMillis.get()) > 60 * 1000) {
+                sendLogBytes.set(0L);
+                sendLogTimeWindowInMillis.set(currTime);
+            }
+
+            try {
                 final BlockedData bd = dataQueue.poll(
-                        config.packageTimeoutInMS / 2, TimeUnit.MILLISECONDS);
+                        producerConfig.packageTimeoutInMS / 2, TimeUnit.MILLISECONDS);
                 if (bd != null) {
                     bd.data.markCompleteIOBeginTimeInMillis(dataQueue.size());
                     try {
@@ -180,9 +191,10 @@ class IOThread implements Runnable {
                         dataQueue.put(bd);
                     }
                 }
+            } catch (InterruptedException e) {
+                LOGGER.warn("Thread has been interrupted.", e);
+                break;
             }
-        } catch (Exception e) {
-            LOGGER.error("Exception happened in IOThread, e=", e);
         }
     }
 }
