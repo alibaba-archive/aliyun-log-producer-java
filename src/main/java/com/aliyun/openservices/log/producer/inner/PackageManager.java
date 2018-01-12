@@ -21,7 +21,7 @@ public class PackageManager {
 	private ProducerConfig config;
 	private Semaphore semaphore;
 	private IOThread ioThread;
-	private ControlThread controlThread;
+	private ControlThreadPool controlThreadPool;
 	private ShardHashManager shardHashManager;
 	public PackageManager(ProducerConfig config, ClientPool pool) {
 		super();
@@ -29,7 +29,7 @@ public class PackageManager {
 		semaphore = new Semaphore(config.memPoolSizeInByte);
 		ioThread = new IOThread(pool, this, config);
 		shardHashManager = new ShardHashManager(pool, config);
-		controlThread = new ControlThread(shardHashManager, this, config);
+		controlThreadPool = ControlThreadPool.launch(shardHashManager, this, config);
 	}
 
 	private static int LogItemListBytes(List<LogItem> logItems) {
@@ -95,7 +95,12 @@ public class PackageManager {
 	}
 
 	public void close() {
-		controlThread.stop();
+		controlThreadPool.shutdown();
+		ioThread.stop();
+	}
+
+	public void closeNow() {
+		controlThreadPool.shutdownNow();
 		ioThread.stop();
 	}
 
