@@ -13,9 +13,9 @@
     <version>0.1.9-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Loghub Producer for Java</name>
+    <name>Aliyun LOG Java Producer</name>
     <url>http://www.aliyun.com</url>
-    <description>Loghub Producer for Java</description>
+    <description>Aliyun LOG Java Producer</description>
     <licenses>
         <license>
             <name></name>
