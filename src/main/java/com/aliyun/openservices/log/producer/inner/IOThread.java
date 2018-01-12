@@ -76,7 +76,7 @@ class IOThread extends Thread {
         this.interrupt();
         cachedThreadPool.shutdown();
         while (!dataQueue.isEmpty()) {
-            BlockedData bd = null;
+            BlockedData bd;
             try {
                 bd = dataQueue.poll(producerConfig.packageTimeoutInMS / 2, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
