@@ -52,6 +52,7 @@ public class ControlThreadPool {
         scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             public void run() {
                 try {
+                    LOGGER.debug("Begin to filter timeout package.");
                     packageManager.filterTimeoutPackage();
                 } catch (Exception e) {
                     LOGGER.error("Failed to filter timeout package.", e);
@@ -64,6 +65,7 @@ public class ControlThreadPool {
         scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             public void run() {
                 try {
+                    LOGGER.debug("Begin to filter expired.");
                     shardHashManager.filterExpired();
                 } catch (Exception e) {
                     LOGGER.error("Failed to filter expired.", e);

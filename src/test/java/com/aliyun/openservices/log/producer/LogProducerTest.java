@@ -6,21 +6,21 @@ import com.aliyun.openservices.log.response.PutLogsResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static org.junit.Assert.assertNull;
+import org.mockito.ArgumentMatchers;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 /**
  * Created by brucewu on 2018/1/12.
  */
 public class LogProducerTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogProducerTest.class);
 
     private static final String MOCK_IP = "192.168.0.25";
 
@@ -33,8 +33,6 @@ public class LogProducerTest {
 
     @After
     public void cleanUp() {
-        System.out.println("here");
-        producer.close();
     }
 
     private ProjectConfig buildProjectConfig1() {
@@ -70,8 +68,6 @@ public class LogProducerTest {
 
         @Override
         public void onCompletion(PutLogsResponse response, LogException e) {
-            LOGGER.info("onCompletion, e=" + e);
-            assertNull(e);
         }
     }
 
@@ -79,19 +75,27 @@ public class LogProducerTest {
     public void testSendToMultiProjects() {
         producer.setProjectConfig(buildProjectConfig1());
         producer.setProjectConfig(buildProjectConfig2());
+
+        TestCallback testCallback1 = mock(TestCallback.class);
+        TestCallback testCallback2 = mock(TestCallback.class);
         producer.send(System.getenv("project1"), "store_1s", "topic1", MOCK_IP, getLogItems(),
-                new TestCallback());
+                testCallback1);
         producer.send(System.getenv("project2"), "store_1s", "topic2", MOCK_IP, getLogItems(),
-                new TestCallback());
+                testCallback2);
         producer.flush();
+        producer.close();
+
+        verify(testCallback1, times(1)).onCompletion(ArgumentMatchers.any(PutLogsResponse.class),
+                (LogException) isNull());
+        verify(testCallback2, times(1)).onCompletion(ArgumentMatchers.any(PutLogsResponse.class),
+                (LogException) isNull());
     }
 
     @Test
     public void testSendToMultiShardLogStore() {
         producer.setProjectConfig(buildProjectConfig1());
-        producer.send(System.getenv("project1"), "store_3s", "topic1", MOCK_IP, getLogItems(),
+        producer.send(System.getenv("project1"), "store_3s", "topic1", MOCK_IP, "", getLogItems(),
                 new TestCallback());
         producer.flush();
     }
-
 }

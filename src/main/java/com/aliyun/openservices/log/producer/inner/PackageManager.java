@@ -82,6 +82,7 @@ public class PackageManager {
 	}
 
 	public void flush() {
+		LOGGER.debug("Try to flush PackageManager.");
 		ArrayList<String> timeoutList = new ArrayList<String>();
 		metaRWLock.writeLock().lock();
 		for (Entry<String, PackageMeta> entry : metaMap.entrySet()) {

@@ -85,7 +85,8 @@ class IOThread extends Thread {
         try {
             this.join();
         } catch (InterruptedException e) {
-            LOGGER.warn("Failed to waiting for the IOThread to die. This may lead to data loss.");
+            LOGGER.warn("Failed to waiting for the IOThread to die. This may lead to data loss.",
+                    e);
         }
         while (!dataQueue.isEmpty()) {
             BlockedData bd;
@@ -210,7 +211,7 @@ class IOThread extends Thread {
                 bd = dataQueue.poll(
                         producerConfig.packageTimeoutInMS / 2, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
-                LOGGER.warn("The IO thread has been interrupted.", e);
+                LOGGER.warn("Failed to poll blockedData from dataQueue.", e);
                 break;
             }
 
@@ -228,7 +229,8 @@ class IOThread extends Thread {
                                 "blockedData=" + bd, e);
                         dataQueue.put(bd);
                     } catch (InterruptedException e1) {
-                        LOGGER.warn("The IO thread has been interrupted.", e1);
+                        LOGGER.warn("Failed to put blockedData to dataQueue again, " +
+                                "blockedData=" + bd, e1);
                         break;
                     }
                 }
