@@ -134,8 +134,7 @@ class IOThread extends Thread {
         Client clt = clientPool.getClient(bd.data.project);
         if (clt == null) {
             bd.data.callback(null, new LogException("ProjectConfigNotExist",
-                    "the config of project " + bd.data.project
-                            + " is not exist", ""), 0);
+                    "the config of project " + bd.data.project + " is not exist", ""), 0);
         } else {
             int retry = 0;
             LogException excep = null;
@@ -227,7 +226,7 @@ class IOThread extends Thread {
                     try {
                         dataQueue.put(bd);
                     } catch (InterruptedException e1) {
-                        LOGGER.info("Try to send data in IOThread.");
+                        LOGGER.info("Failed to put blockedData into data Queue. Try to send it in IOThread.");
                         sendData(bd);
                         break;
                     }
