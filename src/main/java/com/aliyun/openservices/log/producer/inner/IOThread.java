@@ -81,7 +81,6 @@ class IOThread extends Thread {
     }
 
     public void shutdown() {
-        this.interrupt();
         while (!dataQueue.isEmpty()) {
             BlockedData bd;
             try {
@@ -94,6 +93,7 @@ class IOThread extends Thread {
                 sendData(bd);
             }
         }
+        this.interrupt();
         cachedThreadPool.shutdown();
         try {
             if (cachedThreadPool.awaitTermination(
