@@ -172,6 +172,21 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <environmentVariables>
+                        <project1>wb-test-producer-java-1</project1>
+                        <endpoint1>cn-beijing.log.aliyuncs.com</endpoint1>
+                        <accessKeyId>LTAIYWrWKJetT2jw</accessKeyId>
+                        <accessKey>dRGsYSvXlxbYxgXPTqqkysu477gdDW</accessKey>
+                        <project2>wb-test-producer-java-2</project2>
+                        <endpoint2>cn-qingdao.log.aliyuncs.com</endpoint2>
+                    </environmentVariables>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

@@ -81,6 +81,13 @@ class IOThread extends Thread {
     }
 
     public void shutdown() {
+        this.interrupt();
+        try {
+            this.join();
+        } catch (InterruptedException e) {
+            LOGGER.warn("Failed to waiting for the IOThread to die. This may lead to data loss.",
+                    e);
+        }
         while (!dataQueue.isEmpty()) {
             BlockedData bd;
             try {
@@ -92,13 +99,6 @@ class IOThread extends Thread {
             if (bd != null) {
                 sendData(bd);
             }
-        }
-        this.interrupt();
-        try {
-            this.join();
-        } catch (InterruptedException e) {
-            LOGGER.warn("Failed to waiting for the IOThread to die. This may lead to data loss.",
-                    e);
         }
         cachedThreadPool.shutdown();
         try {
@@ -225,12 +225,10 @@ class IOThread extends Thread {
                     });
                 } catch (RejectedExecutionException e) {
                     try {
-                        LOGGER.warn("The blockedData is rejected by cachedThreadPool, " +
-                                "blockedData=" + bd, e);
                         dataQueue.put(bd);
                     } catch (InterruptedException e1) {
-                        LOGGER.warn("Failed to put blockedData to dataQueue again, " +
-                                "blockedData=" + bd, e1);
+                        LOGGER.info("Try to send data in IOThread.");
+                        sendData(bd);
                         break;
                     }
                 }
