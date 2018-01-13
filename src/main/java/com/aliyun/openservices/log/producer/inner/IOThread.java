@@ -25,6 +25,14 @@ class BlockedData {
         this.data = data;
         this.bytes = bytes;
     }
+
+    @Override
+    public String toString() {
+        return "BlockedData{" +
+                "data=" + data +
+                ", bytes=" + bytes +
+                '}';
+    }
 };
 
 class IOThread extends Thread {
@@ -53,7 +61,7 @@ class IOThread extends Thread {
     }
 
     private IOThread(ClientPool cltPool, PackageManager packageManager,
-                    ProducerConfig producerConfig) {
+                     ProducerConfig producerConfig) {
         this.clientPool = cltPool;
         this.packageManager = packageManager;
         this.producerConfig = producerConfig;
@@ -74,7 +82,6 @@ class IOThread extends Thread {
 
     public void shutdown() {
         this.interrupt();
-        cachedThreadPool.shutdown();
         while (!dataQueue.isEmpty()) {
             BlockedData bd;
             try {
@@ -87,6 +94,19 @@ class IOThread extends Thread {
                 sendData(bd);
             }
         }
+        cachedThreadPool.shutdown();
+        try {
+            if (cachedThreadPool.awaitTermination(
+                    2 * producerConfig.packageTimeoutInMS, TimeUnit.MILLISECONDS)) {
+                LOGGER.info("All submitted tasks in cachedThreadPool are executed.");
+            } else {
+                LOGGER.warn("The cachedThreadPool is not terminated. This may lead to data loss.");
+            }
+        } catch (InterruptedException e) {
+            LOGGER.warn(
+                    "The thread has been interrupted during shutdown. This may lead to data loss.",
+                    e);
+        }
     }
 
     public void shutdownNow() {
@@ -96,7 +116,9 @@ class IOThread extends Thread {
 
     private void sendData(BlockedData bd) {
         try {
+            LOGGER.debug("Before execute doSendData(), blockedData={}", bd);
             doSendData(bd);
+            LOGGER.debug("After execute doSendData(), blockedData={}", bd);
         } catch (Exception e) {
             LOGGER.error("Failed to send data.", e);
         }
@@ -192,7 +214,7 @@ class IOThread extends Thread {
                     }
                 }
             } catch (InterruptedException e) {
-                LOGGER.warn("Thread has been interrupted.", e);
+                LOGGER.warn("The IO thread has been interrupted.", e);
                 break;
             }
         }

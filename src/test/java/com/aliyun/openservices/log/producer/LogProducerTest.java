@@ -70,9 +70,8 @@ public class LogProducerTest {
 
         @Override
         public void onCompletion(PutLogsResponse response, LogException e) {
-            LOGGER.info("onCompletion, e="+e);
-            System.out.println("I'm here");
-            // assertNull(e);
+            LOGGER.info("onCompletion, e=" + e);
+            assertNull(e);
         }
     }
 

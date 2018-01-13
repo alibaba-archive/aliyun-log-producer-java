@@ -150,4 +150,18 @@ class PackageData
 	public void setPackageId(String packageId) {
 		this.packageId = packageId;
 	}
+
+	@Override
+	public String toString() {
+		return "PackageData{" +
+				"project='" + project + '\'' +
+				", logstore='" + logstore + '\'' +
+				", topic='" + topic + '\'' +
+				", shardHash='" + shardHash + '\'' +
+				", source='" + source + '\'' +
+				", packageId='" + packageId + '\'' +
+				", items=" + items +
+				", callbacks=" + callbacks +
+				'}';
+	}
 }
