@@ -81,13 +81,6 @@ class IOThread extends Thread {
     }
 
     public void shutdown() {
-        this.interrupt();
-        try {
-            this.join();
-        } catch (InterruptedException e) {
-            LOGGER.warn("Failed to waiting for the IOThread to die. This may lead to data loss.",
-                    e);
-        }
         while (!dataQueue.isEmpty()) {
             BlockedData bd;
             try {
@@ -99,6 +92,13 @@ class IOThread extends Thread {
             if (bd != null) {
                 sendData(bd);
             }
+        }
+        this.interrupt();
+        try {
+            this.join();
+        } catch (InterruptedException e) {
+            LOGGER.warn("Failed to waiting for the IOThread to die. This may lead to data loss.",
+                    e);
         }
         cachedThreadPool.shutdown();
         try {
