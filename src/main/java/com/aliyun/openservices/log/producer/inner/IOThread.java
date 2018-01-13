@@ -81,6 +81,12 @@ class IOThread extends Thread {
     }
 
     public void shutdown() {
+        this.interrupt();
+        try {
+            this.join();
+        } catch (InterruptedException e) {
+            LOGGER.warn("Failed to waiting for the IOThread to die. This may lead to data loss.");
+        }
         while (!dataQueue.isEmpty()) {
             BlockedData bd;
             try {
@@ -93,7 +99,6 @@ class IOThread extends Thread {
                 sendData(bd);
             }
         }
-        this.interrupt();
         cachedThreadPool.shutdown();
         try {
             if (cachedThreadPool.awaitTermination(
@@ -184,7 +189,9 @@ class IOThread extends Thread {
     @Override
     public void run() {
         try {
+            LOGGER.info("The IOThread is going to work.");
             handleBlockedData();
+            LOGGER.info("The IOThread terminated.");
         } catch (Exception e) {
             LOGGER.error("Failed to handle BlockedData.", e);
         }
@@ -198,24 +205,33 @@ class IOThread extends Thread {
                 sendLogTimeWindowInMillis.set(currTime);
             }
 
+            final BlockedData bd;
             try {
-                final BlockedData bd = dataQueue.poll(
+                bd = dataQueue.poll(
                         producerConfig.packageTimeoutInMS / 2, TimeUnit.MILLISECONDS);
-                if (bd != null) {
-                    bd.data.markCompleteIOBeginTimeInMillis(dataQueue.size());
-                    try {
-                        cachedThreadPool.submit(new Runnable() {
-                            public void run() {
-                                sendData(bd);
-                            }
-                        });
-                    } catch (RejectedExecutionException e) {
-                        dataQueue.put(bd);
-                    }
-                }
             } catch (InterruptedException e) {
                 LOGGER.warn("The IO thread has been interrupted.", e);
                 break;
+            }
+
+            if (bd != null) {
+                bd.data.markCompleteIOBeginTimeInMillis(dataQueue.size());
+                try {
+                    cachedThreadPool.submit(new Runnable() {
+                        public void run() {
+                            sendData(bd);
+                        }
+                    });
+                } catch (RejectedExecutionException e) {
+                    try {
+                        LOGGER.warn("The blockedData is rejected by cachedThreadPool, " +
+                                "blockedData=" + bd, e);
+                        dataQueue.put(bd);
+                    } catch (InterruptedException e1) {
+                        LOGGER.warn("The IO thread has been interrupted.", e1);
+                        break;
+                    }
+                }
             }
         }
     }

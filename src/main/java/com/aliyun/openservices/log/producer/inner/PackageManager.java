@@ -13,8 +13,13 @@ import com.aliyun.openservices.log.common.LogContent;
 import com.aliyun.openservices.log.common.LogItem;
 import com.aliyun.openservices.log.producer.ILogCallback;
 import com.aliyun.openservices.log.producer.ProducerConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PackageManager {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(PackageManager.class);
+
 	private ReadWriteLock metaRWLock = new ReentrantReadWriteLock();
 	private HashMap<String, PackageMeta> metaMap = new HashMap<String, PackageMeta>();
 	private ConcurrentHashMap<String, PackageData> dataMap = new ConcurrentHashMap<String, PackageData>();
@@ -94,11 +99,13 @@ public class PackageManager {
 	}
 
 	public void close() {
+		LOGGER.info("Try to close PackageManager.");
 		controlThreadPool.shutdown();
 		ioThread.shutdown();
 	}
 
 	public void closeNow() {
+		LOGGER.info("Try to close PackageManager immediately.");
 		controlThreadPool.shutdownNow();
 		ioThread.shutdownNow();
 	}
