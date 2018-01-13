@@ -68,6 +68,9 @@ public class LogProducerTest {
 
         @Override
         public void onCompletion(PutLogsResponse response, LogException e) {
+            if (e != null) {
+                System.out.println(e);
+            }
         }
     }
 
@@ -94,8 +97,69 @@ public class LogProducerTest {
     @Test
     public void testSendToMultiShardLogStore() {
         producer.setProjectConfig(buildProjectConfig1());
-        producer.send(System.getenv("project1"), "store_3s", "topic1", MOCK_IP, "", getLogItems(),
-                new TestCallback());
+
+        TestCallback testCallback = mock(TestCallback.class);
+        producer.send(
+                System.getenv("project1"),
+                "store_3s",
+                "topic1",
+                "55000000000000000000000000000000",
+                MOCK_IP,
+                getLogItems(),
+                testCallback);
+        producer.send(
+                System.getenv("project1"),
+                "store_3s",
+                "topic2",
+                "55000000000000000000000000000001",
+                MOCK_IP,
+                getLogItems(),
+                testCallback);
+        producer.send(
+                System.getenv("project1"),
+                "store_3s",
+                "topic3",
+                "aa000000000000000000000000000000",
+                MOCK_IP,
+                getLogItems(),
+                testCallback);
+        producer.send(
+                System.getenv("project1"),
+                "store_3s",
+                "topic4",
+                "aa000000000000000000000000000001",
+                MOCK_IP,
+                getLogItems(),
+                testCallback);
+        producer.send(
+                System.getenv("project1"),
+                "store_3s",
+                "topic5",
+                "fffffffffffffffffffffffffffffffe",
+                MOCK_IP,
+                getLogItems(),
+                testCallback);
+
         producer.flush();
+        producer.close();
+
+        verify(testCallback, times(5)).onCompletion(ArgumentMatchers.any(PutLogsResponse.class),
+                (LogException) isNull());
+    }
+
+    @Test
+    public void testInvokeSendMultiTimes() {
+        producer.setProjectConfig(buildProjectConfig1());
+
+        TestCallback testCallback = mock(TestCallback.class);
+        for (int i = 0; i < 50000; ++i) {
+            producer.send(System.getenv("project1"), "store_1s", "topic1", MOCK_IP, getLogItems(),
+                    testCallback);
+        }
+        producer.flush();
+        producer.close();
+
+        verify(testCallback, times(50000)).onCompletion(ArgumentMatchers.any(PutLogsResponse.class),
+                (LogException) isNull());
     }
 }
