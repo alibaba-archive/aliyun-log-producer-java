@@ -121,11 +121,7 @@ public class PackageManager {
 			shardHash = shardHashManager.getBeginHash(project, logStore,
 					shardHash);
 		}
-		StringBuilder strb = new StringBuilder();
-		strb.append(project).append("|").append(logStore).append("|")
-				.append(topic).append("|").append(shardHash).append("|")
-				.append(source);
-		String key = strb.toString();
+        String key = project + "|" + logStore + "|" + topic + "|" + shardHash + "|" + source;
 		int linesCount = logItems.size();
 		int logBytes = LogItemListBytes(logItems);
 
