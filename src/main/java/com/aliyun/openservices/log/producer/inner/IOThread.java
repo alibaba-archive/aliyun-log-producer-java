@@ -210,7 +210,7 @@ class IOThread extends Thread {
                 bd = dataQueue.poll(
                         producerConfig.packageTimeoutInMS / 2, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
-                LOGGER.warn("Failed to poll blockedData from dataQueue.", e);
+                LOGGER.info("The IOThread has been interrupted when poll data from dataQueue.");
                 break;
             }
 

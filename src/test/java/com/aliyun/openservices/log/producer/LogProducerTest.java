@@ -144,19 +144,4 @@ public class LogProducerTest {
                 (LogException) isNull());
     }
 
-    @Test
-    public void testInvokeSendMultiTimes() {
-        producer.setProjectConfig(buildProjectConfig1());
-
-        TestCallback testCallback = mock(TestCallback.class);
-        for (int i = 0; i < 100000; ++i) {
-            producer.send(System.getenv("project1"), "store_1s", "topic1", MOCK_IP, getLogItems(),
-                    testCallback);
-        }
-        producer.flush();
-        producer.close();
-
-        verify(testCallback, times(100000)).onCompletion(ArgumentMatchers.any(PutLogsResponse.class),
-                (LogException) isNull());
-    }
 }
