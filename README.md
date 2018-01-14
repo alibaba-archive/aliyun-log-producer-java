@@ -17,9 +17,19 @@ step 1:
 maven工程中添加依赖：
 ```
 <dependency>
-	<groupId>com.aliyun</groupId>
-	<artifactId>log-loghub-producer-inner</artifactId>
-	<version>0.2</version>
+    <groupId>com.aliyun.openservices</groupId>
+    <artifactId>log-loghub-producer</artifactId>
+    <version>0.1.9</version>
+</dependency>
+<dependency>
+    <groupId>com.google.protobuf</groupId>
+    <artifactId>protobuf-java</artifactId>
+    <version>2.5.0</version>
+</dependency>
+<dependency>
+    <groupId>com.aliyun.openservices</groupId>
+    <artifactId>aliyun-log</artifactId>
+    <version>0.6.10</version>
 </dependency>
 ```
 step 2：程序中配置ProducerConfig，其中各个参数说明如下。
