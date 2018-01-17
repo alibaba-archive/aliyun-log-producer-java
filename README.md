@@ -19,7 +19,7 @@
 
 在以上场景中，Java Producer Library 会简化您程序开发的步骤，您无需关心日志采集细节实现、也不用担心日志采集会影响您的业务正常运行，大大降低数据采集门槛。
 
-![image.png](https://oss-cn-hangzhou.aliyuncs.com/yqfiles/0c5e22da184eec0f93979cec8ff159394b1143e0.png)
+![image.png](/pics/producer.png)
 
 以上各种接入方式的对比：
 <table>
