@@ -10,12 +10,31 @@ import com.aliyun.openservices.log.producer.ProducerConfig;
 import com.aliyun.openservices.log.producer.ProjectConfig;
 
 public class ProducerSample {
-	private final static int ThreadsCount = 4;
+
+	private static final String MOCK_IP = "192.168.0.25";
+
+	private static final int ThreadsCount = 4;
+
+	private static ProjectConfig buildProjectConfig1() {
+		String projectName = System.getenv("project1");
+		String endpoint = System.getenv("endpoint1");
+		String accessKeyId = System.getenv("accessKeyId");
+		String accessKey = System.getenv("accessKey");
+		return new ProjectConfig(projectName, endpoint, accessKeyId, accessKey);
+	}
+
+	private static ProjectConfig buildProjectConfig2() {
+		String projectName = System.getenv("project2");
+		String endpoint = System.getenv("endpoint2");
+		String accessKeyId = System.getenv("accessKeyId");
+		String accessKey = System.getenv("accessKey");
+		return new ProjectConfig(projectName, endpoint, accessKeyId, accessKey);
+	}
 
 	public static String RandomString(int length) {
 		String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		Random random = new Random();
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			int num = random.nextInt(62);
 			buf.append(str.charAt(num));
@@ -26,12 +45,11 @@ public class ProducerSample {
 	public static void main(String args[]) throws InterruptedException {
 		System.out.println(System.currentTimeMillis());
 		ProducerConfig producerConfig = new ProducerConfig();
-		//producerConfig.logsFormat = "json";
 		// 使用默认producer配置
 		final LogProducer producer = new LogProducer(producerConfig);
 		// 添加多个project配置
-		producer.setProjectConfig(new ProjectConfig("",
-				"", "", ""));
+		producer.setProjectConfig(buildProjectConfig1());
+		producer.setProjectConfig(buildProjectConfig2());
 		// 生成日志集合，用于测试
 		final Vector<Vector<LogItem>> logGroups = new Vector<Vector<LogItem>>();
 		for (int i = 0; i < 100000; ++i) {
@@ -53,9 +71,10 @@ public class ProducerSample {
 				public void run() {
 					int j = 0, rand = random.nextInt(99999);
 					while (++j < Integer.MAX_VALUE) {
-						producer.send("ali-log-beizhou", "test-producer", "topic",
-								"10.101.166.178", logGroups.get(rand),
-								new CallbackSample("ali-log-beizhou", "test", "topic", "10.101.166.178", null, logGroups.get(rand), producer));
+						producer.send(System.getenv("project1"), "store_1s", "topic1", MOCK_IP,
+								logGroups.get(rand),
+								new CallbackSample(System.getenv("project1"), "store_1s",
+										"topic1", MOCK_IP, null, logGroups.get(rand), producer));
 					}
 				}
 			}, i + "");

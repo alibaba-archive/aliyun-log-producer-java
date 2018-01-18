@@ -31,3 +31,6 @@ hs_err_pid*
 # release files
 release.properties
 pom.xml.releaseBackup
+
+# Ignore Local Files
+.wb_test_env_rc
