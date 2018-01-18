@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -10,7 +9,7 @@
 
     <groupId>com.aliyun.openservices</groupId>
     <artifactId>log-loghub-producer</artifactId>
-    <version>0.1.9-SNAPSHOT</version>
+    <version>0.1.9</version>
     <packaging>jar</packaging>
 
     <name>Aliyun LOG Java Producer</name>
@@ -18,8 +17,8 @@
     <description>Aliyun LOG Java Producer</description>
     <licenses>
         <license>
-            <name></name>
-            <url></url>
+            <name />
+            <url />
             <distribution>repo</distribution>
             <comments>Copyright (C) Alibaba Cloud Computing. All rights reserved.</comments>
         </license>
