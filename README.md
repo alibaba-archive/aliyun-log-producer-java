@@ -77,7 +77,7 @@ Java Producer Library 配置分为以下几个步骤：
 <dependency>
 	<groupId>com.aliyun.openservices</groupId>
 	<artifactId>log-loghub-producer</artifactId>
-	<version>0.1.9</version>
+	<version>0.1.10</version>
 </dependency>
 ```
 
