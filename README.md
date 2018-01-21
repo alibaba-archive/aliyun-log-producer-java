@@ -2,8 +2,7 @@
 
 [![Build Status](https://travis-ci.org/aliyun/aliyun-log-producer-java.svg?branch=master)](https://travis-ci.org/aliyun/aliyun-log-producer-java)
 
-日志服务 Java Producer Library 是针对 Java 应用程序编写的高并发写 LogHub 类库，Producer Library 和 [Consumer Library]
-(https://yq.aliyun.com/articles/6817) 是对 LogHub 的读写包装，降低数据收集与消费的门槛。
+日志服务 Java Producer Library 是针对 Java 应用程序编写的高并发写 LogHub 类库，Producer Library 和 [Consumer Library](https://yq.aliyun.com/articles/6817) 是对 LogHub 的读写包装，降低数据收集与消费的门槛。
 
 
 ## 功能特点
