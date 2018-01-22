@@ -1,67 +1,67 @@
 # Aliyun LOG Java Producer
 
 [![Build Status](https://travis-ci.org/aliyun/aliyun-log-producer-java.svg?branch=master)](https://travis-ci.org/aliyun/aliyun-log-producer-java)
+[![License](https://img.shields.io/badge/license-Apache2.0-blue.svg)](/LICENSE)
 
-日志服务 Java Producer Library 是针对 Java 应用程序编写的高并发写 LogHub 类库，Producer Library 和 [Consumer Library](https://yq.aliyun.com/articles/6817) 是对 LogHub 的读写包装，降低数据收集与消费的门槛。
+[中文版README](/README_CN.md)
 
+The `Aliyun LOG Java Producer` is a high concurrency writing library written for Java applications. The Producer Library and [Consumer Library](https://yq.aliyun.com/articles/6817) is a reading and writing encapsulation for Loghub. It aims to reduce the threshold for data collection and consumption.
 
-## 功能特点
+## Feature
 
-* 提供异步的发送接口，线程安全。
-* 可以添加多个Project的配置。
-* 用于发送的网络 I/O 线程数量可以配置。
-* merge成的包的日志数量以及大小都可以配置。
-* 内存使用可控，当内存使用达到用户配置的阈值时，Producer 的 send 接口会阻塞，直到有空闲的内存可用。
+* Provide an asynchronous sending interface, thread safety.
+* You can configure more than one project.
+* You can control the thread number for sending data.
+* You can control the number and size of logs being merged into one package.
+* You can control the memory usage. When the memory usage reach the threshold configured by user, the producer's send interface will be blocked until the free memory is available.
 
-## 功能优势
+## Advantage
 
-* 客户端日志不落盘：既数据产生后直接通过网络发往服务端。
-* 客户端高并发写入：例如一秒钟会有百次以上写操作。
-* 客户端计算与 I/O 逻辑分离：打印日志不影响计算耗时。
+* `Disk Free`: the generation data will be send to AliCloud Log Service in real time through network.
+* `High Throughput`: support more than 100 write operations per second.
+* `The Computing and IO is separated`: recoding logs do not affect computing time.
 
-在以上场景中，Java Producer Library 会简化您程序开发的步骤，您无需关心日志采集细节实现、也不用担心日志采集会影响您的业务正常运行，大大降低数据采集门槛。
+In the above scenarios, the `Aliyun LOG Java Producer` will alleviate the burden of your development. You don't need to care about log collection implementation details. And there is no need to worry about that log collection will impact on the normal operation of your business. Reducing the threshold of data acquisition greatly.
 
 ![image.png](/pics/producer.png)
 
-以上各种接入方式的对比：
+The comparison of all kinds of access methods
 <table>
 <thead>
 <tr>
-<th>接入方式</th>
-<th>优点/缺点</th>
-<th>针对场景</th>
+<th>Access Mode</th>
+<th>Pros/Cons</th>
+<th>Use Case</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>日志落盘 + Logtail</td>
-<td>日志收集与打日志解耦，无需修改代码</td>
-<td>常用场景</td>
+<td>log file + Logtail</td>
+<td>Log writing
+ and log collection decoupling, there is no need to modify your code.</td>
+<td>common case</td>
 </tr>
 <tr>
 <td><a href="https://yq.aliyun.com/articles/17129">syslog</a> + Logtail</td>
-<td>性能较好（80MB/S），日志不落盘，需支持 syslog 协议</td>
-<td>syslog 场景</td>
+<td>Good performance (80MB/S), disk free, the syslog protocol needs to be supported.</td>
+<td>syslog</td>
 </tr>
 <tr>
-<td>SDK 直发</td>
-<td>不落盘，直接发往服务端，需要处理好网络 IO 与程序 IO 之间的切换</td>
-<td>日志不落盘</td>
+<td><a href="https://yq.aliyun.com/articles/17129">Aliyun Log Java SDK</a></td>
+<td>Disk free, the data will be send to AliCloud Log Service directly, you need to care about the switch of network IO and program IO.</td>
+<td>The log will not be written to a file</td>
 </tr>
 <tr>
-<td>Producer Library</td>
-<td>不落盘，异步合并发送服务端，吞吐量较好</td>
-<td>日志不落盘，客户端 QPS 高</td>
+<td>Aliyun LOG Java Producer</td>
+<td>Disk free, asynchronous and high throughput.</td>
+<td>The log will not be written to a file, high QPS.</td>
 </tr>
 </tbody>
 </table>
 
-## 配置步骤
+## Configuration Steps
 
-Java Producer Library 配置分为以下几个步骤：
-
-
-### 1. maven 工程中引入依赖
+### 1. Adding the Dependencies in pom.xml
 
 ```
 <dependency>
@@ -81,106 +81,104 @@ Java Producer Library 配置分为以下几个步骤：
 </dependency>
 ```
 
-### 2. 程序中配置 ProducerConfig
+### 2. Configure ProducerConfig
 
-配置格式如下，参数取值见本文档中参数取值部分。
-
+The configuration format is as follows. Please refer to the parameter description part for parameter value.
 ```
 public class ProducerConfig {
-    //被缓存起来的日志的发送超时时间，如果缓存超时，则会被立即发送，单位是毫秒
+    // Specify the timeout for sending package, in milliseconds, default is 3000
     public int packageTimeoutInMS = 3000;
-    //每个缓存的日志包中包含日志数量的最大值，不能超过4096
+    // Specify the maximum log count per package, the upper limit is 4096
     public int logsCountPerPackage = 4096;
-    //每个缓存的日志包的大小的上限，不能超过5MB，单位是字节
+    // Specify the maximum cache size per package, the upper limit is 5MB, in bytes
     public int logsBytesPerPackage = 3 * 1024 * 1024;
-    //单个producer实例可以使用的内存的上限，单位是字节
+    // The upper limit of the memory that can be used by each producer instance, in bytes, default is 100MB
     public int memPoolSizeInByte = 100 * 1024 * 1024;
-    //当使用指定shardhash的方式发送日志时，这个参数需要被设置，否则不需要关心。后端merge线程会将映射到同一个shard的数据merge在一起，而shard关联的是一个hash区间，
-    //producer在处理时会将用户传入的hash映射成shard关联hash区间的最小值。每一个shard关联的hash区间，producer会定时从从loghub拉取，该参数的含义是每隔shardHashUpdateIntervalInMS毫秒，
-    //更新一次shard的hash区间。
+    // If shardHash is specified when you send data, you should care about this parameter, otherwise there is no need to care about it.
+    // The backend thread will merge the data being sent to the same shard together, and shard is associated with a hash interval.
+    // The producer will pull the hash interval information for each shard from AliCloud Log Service regularly and update the local value, this parameter stands for the time interval.
     public int shardHashUpdateIntervalInMS = 10 * 60 * 1000;
-    //如果发送失败，重试的次数，如果超过该值，就会将异常作为callback的参数，交由用户处理。
+    // Specify the retry times when failing to send data, if exceeds this value, the exception will be used as a parameter for the callback, default is 3
     public int retryTimes = 3;
-    //protobuf
+    // protobuf
     public String logsFormat = "protobuf";
-    //IO线程池最大线程数量
+    // Specify the I/O thread pool's maximum pool size, the main function of the I/O thread pool is to send data, default is 8
     public int maxIOThreadSizeInPool = 8;
-    //userAgent
+    // userAgent
     public String userAgent = "loghub-producer-java";
 }
 ```
 
-### 3. 继承 ILogCallback
+### 3. Extends ILogCallback
 
-使用 callback 主要为了处理日志发送的结果，结果包括发送成功和发生异常。您也可以选择不处理，这样就不需要继承 ILogCallback。
+The main function of callback is to handle the results of sending data. The results include successful status or exception. If you don't care about the result, there is no need to extends ILogCallback.
 
-## 参数说明
+## Parameter Description
 
 <table>
 <thead>
 <tr>
-<th>参数</th>
-<th>参数说明</th>
-<th>取值</th>
+<th>Parameter</th>
+<th>Description</th>
+<th>Value</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>packageTimeoutInMS</td>
-<td>指定被缓存日志的发送超时时间，如果缓存超时，则会被立即发送。</td>
-<td>整数形式，单位为毫秒。</td>
+<td>Specify the timeout for sending package.</td>
+<td>Integer, in milliseconds</td>
 </tr>
 <tr>
 <td>logsCountPerPackage</td>
-<td>指定每个缓存的日志包中包含日志数量的最大值。</td>
-<td>整数形式，取值为1~4096。</td>
+<td>Specify the maximum log count per package.</td>
+<td>Integer, 1~4096</td>
 </tr>
 <tr>
 <td>logsBytesPerPackage</td>
-<td>指定每个缓存的日志包的大小上限。</td>
-<td>整数形式，取值为1~3145728 ，单位为字节。</td>
+<td>Specify the maximum cache size per package.</td>
+<td>Integer, 1~5242880 ,in bytes</td>
 </tr>
 <tr>
 <td>memPoolSizeInByte</td>
-<td>指定单个Producer实例可以使用的内存的上限。</td>
-<td>整数形式，单位为字节。</td>
+<td>The upper limit of the memory that can be used by each producer instance.</td>
+<td>Integer, in bytes</td>
 </tr>
 <tr>
 <td>maxIOThreadSizeInPool</td>
-<td>指定I/O线程池最大线程数量，主要用于发送数据到日志服务。</td>
-<td>整数形式。</td>
+<td>Specify the I/O thread pool's maximum pool size, the main function of the I/O thread pool is to send data.</td>
+<td>Integer, default is 8</td>
 </tr>
 <tr>
 <td>shardHashUpdateIntervalInMS</td>
-<td>指定更新Shard的Hash区间的时间间隔，当指定shardhash的方式发送日志时，需要设置此参数。<br>后端merge线程会将映射到同一个Shard的数据merge在一起，而Shard关联的是一个Hash区间，Producer在处理时会将用户传入的Hash映射成Shard关联Hash区间的最小值。每一个Shard关联的Hash区间，Producer会定时从LogHub拉取。</td>
-<td>整数形式。</td>
+<td>If shardHash is specified when you send data, you should care about this parameter, otherwise there is no need to care about it. The backend thread will merge the data being sent to the same shard together, and shard is associated with a hash interval. The producer will pull the hash interval information for each shard from AliCloud Log Service regularly and update the local value, this parameter stands for the time interval.</td>
+<td>Integer, in milliseconds</td>
 </tr>
 <tr>
 <td>retryTimes</td>
-<td>指定发送失败时重试的次数，如果超过该值，就会将异常作为callback的参数，交由用户处理。</td>
-<td>整数形式。</td>
+<td>Specify the retry times when failing to send data, if exceeds this value, the exception will be used as a parameter for the callback.</td>
+<td>Integer, default is 3</td>
 </tr>
 </tbody>
 </table>
 
-## 使用实例
-
-项目中提供了名为`ProducerSample`和`CallbackSample`的实例。
+## Sample Code
 
 [ProducerSample.java](/src/main/java/com/aliyun/openservices/log/producer/sample/ProducerSample.java)
 
 [CallbackSample.java](/src/main/java/com/aliyun/openservices/log/producer/sample/CallbackSample.java)
 
 
-## 底层日志发送接口
-若 producer 提供的接口满足不了您的日志采集需求，您可以基于底层的[日志发送接口](https://github.com/aliyun/aliyun-log-java-sdk)，开发适合您的应用场景的日志采集API。
+## Aliyun Log Java SDK
+If the interface provided by producer can't meet your log collection requirements, you can develop your own log collection API based on [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk).
 
-## 联系我们
-- [阿里云LOG官方网站](https://www.aliyun.com/product/sls/)
-- [阿里云LOG官方论坛](https://yq.aliyun.com/groups/50)
-- 阿里云官方技术支持：[提交工单](https://workorder.console.aliyun.com/#/ticket/createIndex)
+## Contact Us
+- [Alicloud Log Service homepage](https://www.alibabacloud.com/product/log-service)
+- [Alicloud Log Service doc](https://www.alibabacloud.com/help/product/28958.htm)
+- [Alicloud Log Servic official forum](https://yq.aliyun.com/groups/50)
+- Alicloud Log Servic official technical support: [submit tickets](https://workorder.console.aliyun.com/#/ticket/createIndex)
 
-## 贡献者
-[@zzboy](https://github.com/zzboy)对项目作了很大贡献。
+## Contributors
+[@zzboy](https://github.com/zzboy) made a great contribution to this project.
 
-感谢[@zzboy](https://github.com/zzboy)的杰出工作。
+Thanks for the excellent work by [@zzboy](https://github.com/zzboy)
