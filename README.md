@@ -23,8 +23,6 @@ The `Aliyun LOG Java Producer` is a high concurrency writing library written for
 
 In the above scenarios, the `Aliyun LOG Java Producer` will alleviate the burden of your development. You don't need to care about log collection implementation details. And there is no need to worry about that log collection will impact on the normal operation of your business. Reducing the threshold of data acquisition greatly.
 
-![image.png](/pics/producer.png)
-
 The comparison of all kinds of access methods
 <table>
 <thead>
