@@ -180,14 +180,14 @@ public class ProducerConfig {
 * 检查您项目中引入的 protobuf-java，aliyun-log，log-loghub-producer 这三个 jar 包的版本是否和文档中`maven 工程中引入依赖`部分列出的 jar 包版本一致。
 * 继承 ILogCallback 类，查看 onCompletion 方法的参数：PutLogsResponse respone，LogException e。后台线程在尝试发送数据后，不论成功或失败，都会回调该方法，通过查看上述参数您可以获得数据发送失败的原因。
 ```
-	static private class TestCallback extends ILogCallback {
+static private class TestCallback extends ILogCallback {
 
-        @Override
-        public void onCompletion(PutLogsResponse response, LogException e) {
-            System.out.println(response);
-            System.out.println(e);
-        }
+    @Override
+    public void onCompletion(PutLogsResponse response, LogException e) {
+        System.out.println(response);
+        System.out.println(e);
     }
+}
 ```
 * 如果您发现并没有回调 ILogCallback 的 onCompletion 方法，请检查在您的程序退出之前是否有调用 producer.flush() 和 producer.close() 方法。因为数据发送是由后台线程异步完成的，为了防止缓存在内存里的少量数据丢失，建议您在程序退出之前务必调用 producer.flush() 和 producer.close() 方法。
 * log-loghub-producer 会把运行过程中的关键行为日志通过 slf4j 进行输出，您可以在程序中配置好相应的日志实现框架，打开 DEBUG 级别的日志，观察 log-loghub-producer。
