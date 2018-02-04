@@ -174,9 +174,9 @@ public class ProducerConfig {
 
 [CallbackSample.java](/src/main/java/com/aliyun/openservices/log/producer/sample/CallbackSample.java)
 
-## 问题排查
+## 错误诊断
 
-如果您发现数据没有写入日志服务，可通过如下步骤进行问题排查。
+如果您发现数据没有写入日志服务，可通过如下步骤进行错误诊断。
 * 检查您项目中引入的 protobuf-java，aliyun-log，log-loghub-producer 这三个 jar 包的版本是否和文档中`maven 工程中引入依赖`部分列出的 jar 包版本一致。
 * 继承 ILogCallback 类，查看 onCompletion 方法的参数：PutLogsResponse respone，LogException e。后台线程在尝试发送数据后，不论成功或失败，都会回调该方法，通过查看上述参数您可以获得数据发送失败的原因。
 ```
