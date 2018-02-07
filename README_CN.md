@@ -193,7 +193,43 @@ static private class TestCallback extends ILogCallback {
 * log-loghub-producer 会把运行过程中的关键行为日志通过 slf4j 进行输出，您可以在程序中配置好相应的日志实现框架，打开 DEBUG 级别的日志，观察 log-loghub-producer。
 * 如果通过上述步骤仍然没有解决您的问题请联系我们。
 
-## Aliyun Log Java SDK
+## 常见问题
+
+**Q**: Aliyun LOG Java Producer 依赖 Aliyun LOG Java SDK，而 Aliyun LOG Java SDK 依赖了 2.5.0 版本的 protobuf 库，如果该版本的 protobuf 与用户应用程序中自身带的 protobuf 库冲突怎么办？
+
+**A**: 可以使用 Aliyun LOG Java SDK 提供的一个特殊版本，maven 配置如下：
+
+```
+<dependency>
+    <groupId>com.aliyun.openservices</groupId>
+    <artifactId>aliyun-log</artifactId>
+    <version>0.6.12</version>
+    <classifier>jar-with-dependencies</classifier>
+    <exclusions>
+        <exclusion>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+<dependency>
+    <groupId>com.aliyun.openservices</groupId>
+    <artifactId>log-loghub-producer</artifactId>
+    <version>0.1.10</version>
+    <exclusions>
+        <exclusion>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>com.aliyun.openservices</groupId>
+            <artifactId>aliyun-log</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+```
+
+## Aliyun LOG Java SDK
 若 producer 提供的接口满足不了您的日志采集需求，您可以基于 [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk)，开发适合您的应用场景的日志采集API。
 
 ## 联系我们
