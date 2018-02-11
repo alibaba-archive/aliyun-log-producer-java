@@ -176,7 +176,7 @@ public class ProducerConfig {
 
 ## 权限控制
 
-想要通过 Aliyun LOG Java Producer 向 logstore 中写入数据，需要为使用的账号设置的权限如下：
+想要通过 Aliyun LOG Java Producer 向 logstore 中写入数据，需要为使用的账号设置如下权限，设置方法请参考[RAM文档](https://help.aliyun.com/document_detail/57445.html)：
 <table>
 <thead>
 <tr>

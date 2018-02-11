@@ -168,7 +168,7 @@ The main function of callback is to handle the results of sending data. The resu
 
 ## RAM
 
-If you want to write data to logstore through Aliyun LOG Java Producer, you should configure the following permissions for the account you use.
+If you want to write data to logstore through Aliyun LOG Java Producer, you should configure the following permissions for the account you use. [RAM doc](https://www.alibabacloud.com/help/doc-detail/57445.htm)
 <table>
 <thead>
 <tr>
