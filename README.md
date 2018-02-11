@@ -166,6 +166,23 @@ The main function of callback is to handle the results of sending data. The resu
 
 [CallbackSample.java](/src/main/java/com/aliyun/openservices/log/producer/sample/CallbackSample.java)
 
+## RAM
+
+If you want to write data to logstore through Aliyun LOG Java Producer, you should configure the following permissions for the account you use.
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Resource</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>log:PostLogStoreLogs</td>
+<td>acs:log:${regionName}:${projectOwnerAliUid}:project/${projectName}/logstore/${logstoreName}</td>
+</tr>
+</tbody>
+</table>
 
 ## Aliyun Log Java SDK
 If the interface provided by producer can't meet your log collection requirements, you can develop your own log collection API based on [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk).

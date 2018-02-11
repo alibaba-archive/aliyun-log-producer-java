@@ -174,6 +174,24 @@ public class ProducerConfig {
 
 [CallbackSample.java](/src/main/java/com/aliyun/openservices/log/producer/sample/CallbackSample.java)
 
+## 权限控制
+
+想要通过 Aliyun LOG Java Producer 向 logstore 中写入数据，需要为使用的账号设置的权限如下：
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Resource</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>log:PostLogStoreLogs</td>
+<td>acs:log:${regionName}:${projectOwnerAliUid}:project/${projectName}/logstore/${logstoreName}</td>
+</tr>
+</tbody>
+</table>
+
 ## 错误诊断
 
 如果您发现数据没有写入日志服务，可通过如下步骤进行错误诊断。
