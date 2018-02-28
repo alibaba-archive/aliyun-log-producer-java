@@ -247,6 +247,10 @@ static private class TestCallback extends ILogCallback {
 </dependency>
 ```
 
+**Q**: 使用 producer 向 log service 写数据，PutLogsResponse 返回如下错误信息：error:PostBodyInvalid, upload data time must greater than 0 。
+
+**A**: 某个被发送的 LogItem 的 mLogTime 属性被设置成了0。
+
 ## Aliyun LOG Java SDK
 若 producer 提供的接口满足不了您的日志采集需求，您可以基于 [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk)，开发适合您的应用场景的日志采集API。
 
