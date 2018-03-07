@@ -127,6 +127,8 @@ class IOThread extends Thread {
             LOGGER.debug("After execute doSendData(), blockedData={}", bd);
         } catch (Exception e) {
             LOGGER.error("Failed to send data.", e);
+        } catch (Error e) {
+            LOGGER.error("Failed to send data.", e);
         }
     }
 
