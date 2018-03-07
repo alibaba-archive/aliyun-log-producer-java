@@ -251,6 +251,10 @@ static private class TestCallback extends ILogCallback {
 
 **A**: 某个被发送的 LogItem 的 mLogTime 属性被设置成了0。
 
+**Q**: 如何运行 unit test？
+
+**A**: 编辑文件 `test_env_rc`，填写 project1、endpoint1 等值，然后运行 mvn clean test
+
 ## Aliyun LOG Java SDK
 若 producer 提供的接口满足不了您的日志采集需求，您可以基于 [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk)，开发适合您的应用场景的日志采集API。
 
