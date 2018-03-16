@@ -259,6 +259,9 @@ static private class TestCallback extends ILogCallback {
 source .test_env_rc
 mvn clean test
 ```
+**Q**: 如果写入数据的时候不想指定 topic，调用 `send()` 方法时 topic 该如何指？
+
+**A**: 不要将 topic 设成 null，而是设置成 ""。
 
 ## Aliyun LOG Java SDK
 若 producer 提供的接口满足不了您的日志采集需求，您可以基于 [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk)，开发适合您的应用场景的日志采集API。
