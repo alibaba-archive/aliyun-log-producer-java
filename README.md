@@ -88,7 +88,7 @@ public class ProducerConfig {
     public int packageTimeoutInMS = 3000;
     // Specify the maximum log count per package, the upper limit is 4096
     public int logsCountPerPackage = 4096;
-    // Specify the maximum cache size per package, the upper limit is 5MB, in bytes
+    // Specify the maximum cache size per package, the upper limit is 3MB, in bytes
     public int logsBytesPerPackage = 3 * 1024 * 1024;
     // The upper limit of the memory that can be used by each producer instance, in bytes, default is 100MB
     public int memPoolSizeInByte = 100 * 1024 * 1024;
