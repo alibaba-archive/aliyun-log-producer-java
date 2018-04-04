@@ -94,7 +94,7 @@ public class ProducerConfig {
     public int packageTimeoutInMS = 3000;
     //每个缓存的日志包中包含日志数量的最大值，不能超过4096
     public int logsCountPerPackage = 4096;
-    //每个缓存的日志包的大小的上限，不能超过5MB，单位是字节
+    //每个缓存的日志包的大小的上限，不能超过3MB，单位是字节
     public int logsBytesPerPackage = 3 * 1024 * 1024;
     //单个producer实例可以使用的内存的上限，单位是字节
     public int memPoolSizeInByte = 100 * 1024 * 1024;
