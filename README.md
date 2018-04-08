@@ -88,8 +88,8 @@ public class ProducerConfig {
     public int packageTimeoutInMS = 3000;
     // Specify the maximum log count per package, the upper limit is 4096
     public int logsCountPerPackage = 4096;
-    // Specify the maximum cache size per package, the upper limit is 2MB, in bytes
-    public int logsBytesPerPackage = 2 * 1024 * 1024;
+    // Specify the maximum cache size per package, the upper limit is 3MB, in bytes
+    public int logsBytesPerPackage = 3 * 1024 * 1024;
     // The upper limit of the memory that can be used by each producer instance, in bytes, default is 100MB
     public int memPoolSizeInByte = 100 * 1024 * 1024;
     // If shardHash is specified when you send data, you should care about this parameter, otherwise there is no need to care about it.
@@ -135,7 +135,7 @@ The main function of callback is to handle the results of sending data. The resu
 <tr>
 <td>logsBytesPerPackage</td>
 <td>Specify the maximum cache size per package.</td>
-<td>Integer, 1~2097152(2M),in bytes</td>
+<td>Integer, 1~3145728(3M),in bytes</td>
 </tr>
 <tr>
 <td>memPoolSizeInByte</td>

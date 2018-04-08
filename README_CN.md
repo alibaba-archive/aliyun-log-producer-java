@@ -94,8 +94,8 @@ public class ProducerConfig {
     public int packageTimeoutInMS = 3000;
     //每个缓存的日志包中包含日志数量的最大值，不能超过4096
     public int logsCountPerPackage = 4096;
-    //每个缓存的日志包的大小的上限，不能超过2MB，单位是字节
-    public int logsBytesPerPackage = 2 * 1024 * 1024;
+    //每个缓存的日志包的大小的上限，不能超过3MB，单位是字节
+    public int logsBytesPerPackage = 3 * 1024 * 1024;
     //单个producer实例可以使用的内存的上限，单位是字节
     public int memPoolSizeInByte = 100 * 1024 * 1024;
     //当指定以shardhash的方式发送日志时，这个参数需要被设置，否则不需要关心。后端merge线程会将映射到同一个shard的数据merge在一起，而shard关联的是一个hash区间，
@@ -141,7 +141,7 @@ public class ProducerConfig {
 <tr>
 <td>logsBytesPerPackage</td>
 <td>指定每个缓存的日志包的大小上限。</td>
-<td>整数形式，取值为1~2097152（2M），单位为字节。</td>
+<td>整数形式，取值为1~3145728（3M），单位为字节。</td>
 </tr>
 <tr>
 <td>memPoolSizeInByte</td>
