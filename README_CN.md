@@ -263,6 +263,12 @@ mvn clean test
 
 **A**: 不要将 topic 设成 null，而是设置成 ""。
 
+**Q**: `send()` 接口中 shardHash 的作用？
+
+**A**: 一个 logstore 包含多个 shard。shardHash 决定了这个 logItem 应该位于哪个 shard 上。
+
+https://help.aliyun.com/document_detail/28976.html
+
 ## Aliyun LOG Java SDK
 若 producer 提供的接口满足不了您的日志采集需求，您可以基于 [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk)，开发适合您的应用场景的日志采集API。
 
