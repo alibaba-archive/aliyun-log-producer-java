@@ -269,6 +269,40 @@ mvn clean test
 
 https://help.aliyun.com/document_detail/28976.html
 
+**Q**: 一个 producer 实例，会额外创建哪些线程？
+
+**A**: 一个 producer 实例所创建的线程情况如下
+<table>
+<thead>
+<tr>
+<th>线程类型</th>
+<th>线程名格式</th>
+<th>数量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ControlThread</td>
+<td>log-producer-control-worker-{N}</td>
+<td>2</td>
+</tr>
+<tr>
+<td>IOThread</td>
+<td>log-producer-io-thread</td>
+<td>1</td>
+</tr>
+<tr>
+<td>IOWorkerThread</td>
+<td>log-producer-io-worker-{N}</td>
+<td>最多 ProducerConfig.maxIOThreadSizeInPool 个</td>
+</tr>
+</tbody>
+</table>
+
+**Q**: 一个进程需要创建多少个 producer？
+
+**A**: producer 的方法是线程安全的，一般情况一个进程的所有线程共用一个 producer。
+
 ## Aliyun LOG Java SDK
 若 producer 提供的接口满足不了您的日志采集需求，您可以基于 [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk)，开发适合您的应用场景的日志采集API。
 
