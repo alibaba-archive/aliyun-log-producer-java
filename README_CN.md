@@ -303,6 +303,10 @@ https://help.aliyun.com/document_detail/28976.html
 
 **A**: producer 的方法是线程安全的，一般情况一个进程的所有线程共用一个 producer。
 
+**Q**：写数据时，服务端返回如下错误 aliyun.openservices.log.exception.LogException: Write quota exceed: qps: 517？
+
+**A**：超过了 project 每秒限制的写入次数，说明您的一个 package 所包含的 logItem 过少，检查 packageTimeoutInMS、 logsCountPerPackage 等参数是否设置过低。
+
 ## Aliyun LOG Java SDK
 若 producer 提供的接口满足不了您的日志采集需求，您可以基于 [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk)，开发适合您的应用场景的日志采集API。
 
