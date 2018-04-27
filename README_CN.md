@@ -311,6 +311,10 @@ https://help.aliyun.com/document_detail/28976.html
 
 **A**：不需要。服务端会自动将待写入的数据路由到新分裂出来的两个可写的 shard 上。
 
+**Q**：producer 会缓存待发送的数据，并将数据合并成 package 后批量发往服务端。什么样的数据有机会合并在相同的 package 里？
+
+**A**：有相同 project，logStore，topic，shardHash，source 的数据会被合并在一起。
+
 ## Aliyun LOG Java SDK
 若 producer 提供的接口满足不了您的日志采集需求，您可以基于 [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk)，开发适合您的应用场景的日志采集API。
 
