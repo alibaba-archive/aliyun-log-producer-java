@@ -46,6 +46,7 @@ public class ProducerSample {
 		System.out.println(System.currentTimeMillis());
 		ProducerConfig producerConfig = new ProducerConfig();
 		// 使用默认producer配置
+		// 应该使用那种方式来自定义配置
 		final LogProducer producer = new LogProducer(producerConfig);
 		// 添加多个project配置
 		producer.setProjectConfig(buildProjectConfig1());
