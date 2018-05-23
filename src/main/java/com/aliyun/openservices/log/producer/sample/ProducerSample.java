@@ -13,7 +13,7 @@ public class ProducerSample {
 
 	private static final String MOCK_IP = "192.168.0.25";
 
-	private static final int ThreadsCount = 4;
+	private static final int ThreadsCount = 1;
 
 	private static ProjectConfig buildProjectConfig1() {
 		String projectName = System.getenv("project1");
@@ -70,7 +70,7 @@ public class ProducerSample {
 
 				public void run() {
 					int j = 0, rand = random.nextInt(99999);
-					while (++j < Integer.MAX_VALUE) {
+					while (++j < 10) {
 						producer.send(System.getenv("project1"), "store_1s", "topic1", MOCK_IP,
 								logGroups.get(rand),
 								new CallbackSample(System.getenv("project1"), "store_1s",
@@ -82,7 +82,7 @@ public class ProducerSample {
 		}
 		
 		//等待发送线程退出
-		Thread.sleep(30 * 1000);
+		Thread.sleep(5 * 1000);
 		for (int i = 0; i < ThreadsCount; ++i) {
 			threads[i].interrupt();
 		}
