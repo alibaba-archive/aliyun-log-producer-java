@@ -21,7 +21,7 @@ class ShardHash {
 		super();
 		updateTime = 0L;
 	}
-};
+}
 
 public class ShardHashManager {
 	private ClientPool clientPool;

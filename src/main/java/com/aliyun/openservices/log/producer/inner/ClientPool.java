@@ -13,14 +13,14 @@ public class ClientPool
 	class Pair
 	{
 		public Client client;
-		public int ref = 1;
+		public int ref;
 		public Pair(Client client, int ref) 
 		{
 			super();
 			this.client = client;
 			this.ref = ref;
 		}
-	};
+	}
 	private HashMap<String, String> projectEndpointMap = new HashMap<String, String>();
 	private HashMap<String, Pair> clientPool = new HashMap<String, Pair>();
 	private ReadWriteLock rwLock = new ReentrantReadWriteLock();
