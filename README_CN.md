@@ -247,6 +247,12 @@ static private class TestCallback extends ILogCallback {
 </dependency>
 ```
 
+**Q**: 何时调用 producer 的 `flush()` 方法和 `close()` 方法？
+
+**A**：进程在运行过程中一般不需要用户主动调用 `flush()` 方法，后台线程会按一定的策略异步地将数据写往日志服务。只有当进程将要退出之前，需要用户依次调用 `flush()` 方法和 `close()` 方法，以防止缓存在内存中的数据丢失。
+
+**A**: 一个 producer 实例所创建的线程情况如下
+
 **Q**: 使用 producer 向 log service 写数据，PutLogsResponse 返回如下错误信息：error:PostBodyInvalid, upload data time must greater than 0 。
 
 **A**: 某个被发送的 LogItem 的 mLogTime 属性被设置成了0。
