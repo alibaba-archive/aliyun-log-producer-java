@@ -75,7 +75,7 @@ The comparison of all kinds of access methods
 <dependency>
 	<groupId>com.aliyun.openservices</groupId>
 	<artifactId>log-loghub-producer</artifactId>
-	<version>0.1.11</version>
+	<version>0.1.13</version>
 </dependency>
 ```
 
