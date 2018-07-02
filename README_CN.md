@@ -247,6 +247,12 @@ static private class TestCallback extends ILogCallback {
 </dependency>
 ```
 
+**Q**: 何时调用 producer 的 `flush()` 方法和 `close()` 方法？
+
+**A**：进程在运行过程中一般不需要用户主动调用 `flush()` 方法，后台线程会按一定的策略异步地将数据写往日志服务。只有当进程将要退出之前，需要用户依次调用 `flush()` 方法和 `close()` 方法，以防止缓存在内存中的数据丢失。
+
+**A**: 一个 producer 实例所创建的线程情况如下
+
 **Q**: 使用 producer 向 log service 写数据，PutLogsResponse 返回如下错误信息：error:PostBodyInvalid, upload data time must greater than 0 。
 
 **A**: 某个被发送的 LogItem 的 mLogTime 属性被设置成了0。
@@ -314,6 +320,10 @@ https://help.aliyun.com/document_detail/28976.html
 **Q**：producer 会缓存待发送的数据，并将数据合并成 package 后批量发往服务端。什么样的数据有机会合并在相同的 package 里？
 
 **A**：有相同 project，logStore，topic，shardHash，source 的数据会被合并在一起。
+
+**Q**：producer 在网络发生异常的情况下会如何处理待发送的数据？
+
+**A**：producer 会尝试 `retryTimes` 次，若仍没有成功，会将异常信息作为参数传递给用户定义的回调函数。您可以在回调函数中再次调用 `producer.send()` 方法重新发送写入失败的数据。
 
 ## Aliyun LOG Java SDK
 若 producer 提供的接口满足不了您的日志采集需求，您可以基于 [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk)，开发适合您的应用场景的日志采集API。
