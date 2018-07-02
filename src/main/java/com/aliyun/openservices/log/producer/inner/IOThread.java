@@ -129,6 +129,8 @@ class IOThread extends Thread {
             LOGGER.error("Failed to send data.", e);
         } catch (Error e) {
             LOGGER.error("Failed to send data.", e);
+        } finally {
+            packageManager.releaseBytes(bd.bytes);
         }
     }
 
@@ -185,7 +187,6 @@ class IOThread extends Thread {
                 outflow = sendLogBytes.get() / sec;
             bd.data.callback(response, excep, outflow);
         }
-        packageManager.releaseBytes(bd.bytes);
     }
 
     @Override
