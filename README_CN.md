@@ -311,7 +311,7 @@ https://help.aliyun.com/document_detail/28976.html
 
 **Q**：写数据时，服务端返回如下错误 aliyun.openservices.log.exception.LogException: Write quota exceed: qps: 517？
 
-**A**：超过了 project 写入次数的限制（默认情况下，每个 project 最多允许60万次写入），说明您的一个 package 所包含的 logItem 过少，检查 packageTimeoutInMS、 logsCountPerPackage 等参数是否设置过低。
+**A**：超过了 project 写入次数的限制（默认情况下，每个 project 每分钟最多允许60万次写入），说明您的一个 package 所包含的 logItem 过少，检查 packageTimeoutInMS、 logsCountPerPackage 等参数是否设置过低。
 
 **Q**：手动分裂 shard 后，原来 shard 变成只读了，需要重启写入程序吗？
 
