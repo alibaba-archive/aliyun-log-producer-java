@@ -325,6 +325,10 @@ https://help.aliyun.com/document_detail/28976.html
 
 **A**：producer 会尝试 `retryTimes` 次，若仍没有成功，会将异常信息作为参数传递给用户定义的回调函数。您可以在回调函数中再次调用 `producer.send()` 方法重新发送写入失败的数据。
 
+**Q**：producer 能否保证日志上传顺序？即先发送的日志排先写入服务端？
+
+**A**：producer 异步多线程发送顺序，无法保证日志上传顺序。
+
 ## Aliyun LOG Java SDK
 若 producer 提供的接口满足不了您的日志采集需求，您可以基于 [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk)，开发适合您的应用场景的日志采集API。
 
