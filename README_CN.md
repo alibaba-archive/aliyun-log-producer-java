@@ -329,6 +329,10 @@ https://help.aliyun.com/document_detail/28976.html
 
 **A**：producer 异步多线程发送顺序，无法保证日志上传顺序。
 
+**Q**：producer 支持通过 HTTPS 发送日志吗？
+
+**A**：支持。将`ProjectConfig.endpoint`设置成`https://<endpoint>`即可。
+
 ## Aliyun LOG Java SDK
 若 producer 提供的接口满足不了您的日志采集需求，您可以基于 [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk)，开发适合您的应用场景的日志采集API。
 
