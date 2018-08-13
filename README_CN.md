@@ -284,6 +284,7 @@ https://help.aliyun.com/document_detail/28976.html
 <th>线程类型</th>
 <th>线程名格式</th>
 <th>数量</th>
+<th>描述</th>
 </tr>
 </thead>
 <tbody>
@@ -291,16 +292,19 @@ https://help.aliyun.com/document_detail/28976.html
 <td>ControlThread</td>
 <td>log-producer-control-worker-{N}</td>
 <td>2</td>
+<td>1. 用于将超时 package 提交到内部阻塞队列。</br>2. 用于控制 shardHash 更新时间。</td>
 </tr>
 <tr>
 <td>IOThread</td>
 <td>log-producer-io-thread</td>
 <td>1</td>
+<td>从阻塞队列中获取数据然后提交至内部线程池。</td>
 </tr>
 <tr>
 <td>IOWorkerThread</td>
 <td>log-producer-io-worker-{N}</td>
 <td>最多 ProducerConfig.maxIOThreadSizeInPool 个</td>
+<td>线程池中真正用来发送数据的线程。</td>
 </tr>
 </tbody>
 </table>
