@@ -80,7 +80,7 @@ Aliyun LOG Java Producer 配置分为以下几个步骤：
 <dependency>
 	<groupId>com.aliyun.openservices</groupId>
 	<artifactId>log-loghub-producer</artifactId>
-	<version>0.1.13</version>
+	<version>0.1.14</version>
 </dependency>
 ```
 
@@ -336,6 +336,10 @@ https://help.aliyun.com/document_detail/28976.html
 **Q**：producer 支持通过 HTTPS 发送日志吗？
 
 **A**：支持。将`ProjectConfig.endpoint`设置成`https://<endpoint>`即可。
+
+**Q**：日志写入失败，错误信息为 `InvalidLogSize, logItems' length exceeds maximum limitation : 40960 lines, ...`？
+
+**A**：在 `0.1.13` 及之前版本如果您调用 send() 方法时传入的 logItems 过长（超过了 40960 条），producer 又不会对原始 logItems 切割，导致抛出该异常。为了解决该问题，您可以将 producer 升级到 `0.1.14` 版本，如果您无法升级 producer 版本，需要您在调用 send() 接口前控制 logItems 长度。
 
 ## Aliyun LOG Java SDK
 若 producer 提供的接口满足不了您的日志采集需求，您可以基于 [Aliyun Log Java SDK](https://github.com/aliyun/aliyun-log-java-sdk)，开发适合您的应用场景的日志采集API。
