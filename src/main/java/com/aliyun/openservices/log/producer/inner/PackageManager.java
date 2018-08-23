@@ -114,8 +114,33 @@ public class PackageManager {
     }
 
     public void add(String project, String logStore, String topic,
-                    String shardHash, String source, List<LogItem> logItems,
+                    String shardHash, String source, List<LogItem> srcLogItems,
                     ILogCallback callback) {
+        List<List<LogItem>> sepLogItems = splitLogItems(srcLogItems);
+        for (List<LogItem> logItems : sepLogItems) {
+            doAdd(project, logStore, topic, shardHash, source, logItems, callback);
+        }
+    }
+
+    public List<List<LogItem>> splitLogItems(List<LogItem> srcLogItems) {
+        List<List<LogItem>> sepLogItems = new ArrayList<List<LogItem>>();
+        int linesCount = srcLogItems.size();
+        int num = (linesCount + config.logsCountPerPackage - 1) / config.logsCountPerPackage;
+        for (int i = 0; i < num; ++i) {
+            int fromIndex = i * config.logsCountPerPackage;
+            int toIndex = (i + 1) * config.logsCountPerPackage;
+            if (toIndex > linesCount) {
+                toIndex = linesCount;
+            }
+            List<LogItem> logItems = srcLogItems.subList(fromIndex, toIndex);
+            sepLogItems.add(logItems);
+        }
+        return sepLogItems;
+    }
+
+    public void doAdd(String project, String logStore, String topic,
+                      String shardHash, String source, List<LogItem> logItems,
+                      ILogCallback callback) {
         if (callback != null) {
             callback.callSendBeginTimeInMillis = System.currentTimeMillis();
         }
