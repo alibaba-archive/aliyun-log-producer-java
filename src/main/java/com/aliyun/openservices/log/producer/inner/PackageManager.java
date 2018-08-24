@@ -9,6 +9,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.aliyun.openservices.log.common.Consts;
 import com.aliyun.openservices.log.common.LogContent;
 import com.aliyun.openservices.log.common.LogItem;
 import com.aliyun.openservices.log.producer.ILogCallback;
@@ -50,8 +51,8 @@ public class PackageManager {
     }
 
     void acquireBytes(final int b) {
-        if (b > config.memPoolSizeInByte) {
-            throw new RuntimeException("The logBytes is " + b + " which is greater than memPoolSizeInByte " + config.memPoolSizeInByte);
+        if (b > config.memPoolSizeInByte || b > Consts.CONST_MAX_PUT_SIZE) {
+            throw new RuntimeException("Failed to acquire bytes " + b + ", which cannot exceed memPoolSizeInByte " + config.memPoolSizeInByte + " and CONST_MAX_PUT_SIZE " + Consts.CONST_MAX_PUT_SIZE);
         }
         semaphore.acquireUninterruptibly(b);
     }
