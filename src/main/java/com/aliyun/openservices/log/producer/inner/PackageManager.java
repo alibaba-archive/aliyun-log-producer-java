@@ -50,6 +50,9 @@ public class PackageManager {
     }
 
     void acquireBytes(final int b) {
+        if (b > config.memPoolSizeInByte) {
+            throw new RuntimeException("The logBytes is " + b + " which is greater than memPoolSizeInByte " + config.memPoolSizeInByte);
+        }
         semaphore.acquireUninterruptibly(b);
     }
 
