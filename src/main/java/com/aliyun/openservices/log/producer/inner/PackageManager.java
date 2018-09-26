@@ -57,6 +57,13 @@ public class PackageManager {
         semaphore.acquireUninterruptibly(b);
     }
 
+    boolean tryAcquireBytes(final int b) {
+        if (b > config.memPoolSizeInByte || b > Consts.CONST_MAX_PUT_SIZE) {
+            return false;
+        }
+        return semaphore.tryAcquire(b);
+    }
+
     void releaseBytes(final int b) {
         semaphore.release(b);
     }
