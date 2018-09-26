@@ -1,5 +1,7 @@
 package com.aliyun.openservices.log.producer;
 
+import static org.junit.Assert.*;
+
 import com.aliyun.openservices.log.common.LogItem;
 import com.aliyun.openservices.log.exception.LogException;
 import com.aliyun.openservices.log.response.PutLogsResponse;
@@ -17,7 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class LogProducerDeadlockTest {
+public class LogProducerTrySendTest {
 
     private static final String MOCK_IP = "192.168.0.25";
 
@@ -26,7 +28,7 @@ public class LogProducerDeadlockTest {
     @Before
     public void setUp() {
         ProducerConfig producerConfig = new ProducerConfig();
-        producerConfig.memPoolSizeInByte = 1024;
+        producerConfig.memPoolSizeInByte = 100;
         producer = new LogProducer(producerConfig);
     }
 
@@ -44,9 +46,10 @@ public class LogProducerDeadlockTest {
 
     private List<LogItem> getLogItems() {
         List<LogItem> logItems = new ArrayList<LogItem>();
-
         LogItem logItem = new LogItem((int) (new Date().getTime() / 1000));
-        logItem.PushBack("", "val");
+        for (int i = 0; i < 1000; ++i) {
+            logItem.PushBack("key", "val");
+        }
         logItems.add(logItem);
         return logItems;
     }
@@ -63,18 +66,20 @@ public class LogProducerDeadlockTest {
         producer.setProjectConfig(buildProjectConfig());
 
         TestCallback testCallback = mock(TestCallback.class);
-        for (int i = 0; i < 1000; ++i) {
-            producer.send(System.getenv("project1"), "store_1s", "topic1", MOCK_IP, getLogItems(),
-                    testCallback);
-        }
+        boolean res = producer.trySend(
+                System.getenv("project1"),
+                "store_1s",
+                "topic1",
+                MOCK_IP,
+                getLogItems(),
+                testCallback
+        );
         producer.flush();
         producer.close();
+        assertTrue(!res);
 
-        verify(testCallback, times(1000)).
-                onCompletion(
-                        (PutLogsResponse) isNull(),
-                        ArgumentMatchers.any(LogException.class)
-                );
+        verify(testCallback, times(0)).onCompletion(ArgumentMatchers.any(PutLogsResponse.class),
+                (LogException) isNull());
     }
 
 }

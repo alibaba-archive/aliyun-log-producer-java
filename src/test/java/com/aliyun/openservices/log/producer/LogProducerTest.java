@@ -140,8 +140,11 @@ public class LogProducerTest {
         producer.flush();
         producer.close();
 
-        verify(testCallback, times(5)).onCompletion(ArgumentMatchers.any(PutLogsResponse.class),
-                (LogException) isNull());
+        verify(testCallback, times(5)).
+                onCompletion(
+                        ArgumentMatchers.any(PutLogsResponse.class),
+                        (LogException) isNull()
+                );
     }
 
 }
