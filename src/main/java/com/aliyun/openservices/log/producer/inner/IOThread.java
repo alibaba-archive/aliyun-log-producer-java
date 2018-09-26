@@ -121,71 +121,92 @@ class IOThread extends Thread {
     }
 
     private void sendData(BlockedData bd) {
+        LogException excp = null;
+        PutLogsResponse response = null;
         try {
-            LOGGER.debug("Before execute doSendData(), blockedData={}", bd);
-            doSendData(bd);
-            LOGGER.debug("After execute doSendData(), blockedData={}", bd);
+            response = doSendData(bd);
+        } catch (LogException e) {
+            LOGGER.error("Failed to send data.", e);
+            excp = e;
         } catch (Exception e) {
             LOGGER.error("Failed to send data.", e);
+            excp = new LogException("Exception", e.getMessage(), "");
         } catch (Error e) {
             LOGGER.error("Failed to send data.", e);
+            excp = new LogException("Error", e.getMessage(), "");
+        }
+        long currTime = System.currentTimeMillis();
+        float sec = (currTime - sendLogTimeWindowInMillis.get()) / 1000.0f;
+        float outflow = 0;
+        if (sec > 0)
+            outflow = sendLogBytes.get() / sec;
+        executeCallback(bd, response, excp, outflow);
+    }
+
+    private PutLogsResponse doSendData(BlockedData bd) throws LogException {
+        try {
+            Client clt = clientPool.getClient(bd.data.project);
+            if (clt == null) {
+                throw new LogException("ProjectConfigNotExist",
+                        "the config of project " + bd.data.project + " is not exist", "");
+            } else {
+                int retry = 0;
+                LogException excep = null;
+                PutLogsResponse response = null;
+                while (retry++ <= producerConfig.retryTimes) {
+                    try {
+                        response = sendRequest(clt, bd);
+                        excep = null;
+                        break;
+                    } catch (LogException e) {
+                        excep = new LogException(e.GetErrorCode(),
+                                e.GetErrorMessage() + ", itemscount: "
+                                        + bd.data.items.size(), e.GetRequestId());
+                    }
+                }
+                if (excep != null) {
+                    throw excep;
+                }
+                return response;
+            }
         } finally {
             packageManager.releaseBytes(bd.bytes);
         }
     }
 
-    private void doSendData(BlockedData bd) {
-        Client clt = clientPool.getClient(bd.data.project);
-        if (clt == null) {
-            bd.data.callback(null, new LogException("ProjectConfigNotExist",
-                    "the config of project " + bd.data.project + " is not exist", ""), 0);
-        } else {
-            int retry = 0;
-            LogException excep = null;
-            PutLogsResponse response = null;
-            while (retry++ <= producerConfig.retryTimes) {
-                try {
-                    if (bd.data.shardHash != null
-                            && !bd.data.shardHash.isEmpty()) {
-                        PutLogsRequest request = new PutLogsRequest(
-                                bd.data.project, bd.data.logstore,
-                                bd.data.topic, bd.data.source, bd.data.items,
-                                bd.data.shardHash);
-                        List<TagContent> tags = new ArrayList<TagContent>();
-                        tags.add(new TagContent("__pack_id__", bd.data.getPackageId()));
-                        request.SetTags(tags);
-                        request.setContentType(producerConfig.logsFormat.equals("protobuf") ?
-                                Consts.CONST_PROTO_BUF
-                                : Consts.CONST_SLS_JSON);
-                        response = clt.PutLogs(request);
+    private void executeCallback(BlockedData bd, PutLogsResponse response, LogException excp, float srcOutFlow) {
+        try {
+            bd.data.callback(response, excp, srcOutFlow);
+        } catch (Exception e) {
+            LOGGER.error("Failed to invoke callback.", e);
+        }
+    }
 
-                    } else {
-                        PutLogsRequest request = new PutLogsRequest(
-                                bd.data.project, bd.data.logstore,
-                                bd.data.topic, bd.data.source, bd.data.items);
-                        List<TagContent> tags = new ArrayList<TagContent>();
-                        tags.add(new TagContent("__pack_id__", bd.data.getPackageId()));
-                        request.SetTags(tags);
-                        request.setContentType(producerConfig.logsFormat.equals("protobuf") ?
-                                Consts.CONST_PROTO_BUF
-                                : Consts.CONST_SLS_JSON);
-                        response = clt.PutLogs(request);
-                    }
-                    long tmpBytes = sendLogBytes.get();
-                    sendLogBytes.set(tmpBytes + bd.bytes);
-                    break;
-                } catch (LogException e) {
-                    excep = new LogException(e.GetErrorCode(),
-                            e.GetErrorMessage() + ", itemscount: "
-                                    + bd.data.items.size(), e.GetRequestId());
-                }
-            }
-            long currTime = System.currentTimeMillis();
-            float sec = (currTime - sendLogTimeWindowInMillis.get()) / 1000.0f;
-            float outflow = 0;
-            if (sec > 0)
-                outflow = sendLogBytes.get() / sec;
-            bd.data.callback(response, excep, outflow);
+    private PutLogsResponse sendRequest(Client clt, BlockedData bd) throws LogException {
+        PutLogsRequest request = buildRequest(bd);
+        List<TagContent> tags = new ArrayList<TagContent>();
+        tags.add(new TagContent("__pack_id__", bd.data.getPackageId()));
+        request.SetTags(tags);
+        request.setContentType(producerConfig.logsFormat.equals("protobuf") ?
+                Consts.CONST_PROTO_BUF
+                : Consts.CONST_SLS_JSON);
+        PutLogsResponse response = clt.PutLogs(request);
+        long tmpBytes = sendLogBytes.get();
+        sendLogBytes.set(tmpBytes + bd.bytes);
+        return response;
+    }
+
+    private PutLogsRequest buildRequest(BlockedData bd) {
+        if (bd.data.shardHash != null
+                && !bd.data.shardHash.isEmpty()) {
+            return new PutLogsRequest(
+                    bd.data.project, bd.data.logstore,
+                    bd.data.topic, bd.data.source, bd.data.items,
+                    bd.data.shardHash);
+        } else {
+            return new PutLogsRequest(
+                    bd.data.project, bd.data.logstore,
+                    bd.data.topic, bd.data.source, bd.data.items);
         }
     }
 
