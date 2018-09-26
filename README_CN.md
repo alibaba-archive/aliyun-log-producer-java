@@ -75,12 +75,12 @@ Aliyun LOG Java Producer 配置分为以下几个步骤：
 <dependency>
 	<groupId>com.aliyun.openservices</groupId>
  	<artifactId>aliyun-log</artifactId>
-	<version>0.6.10</version>
+	<version>0.6.24</version>
 </dependency>
 <dependency>
 	<groupId>com.aliyun.openservices</groupId>
 	<artifactId>log-loghub-producer</artifactId>
-	<version>0.1.15</version>
+	<version>0.1.16</version>
 </dependency>
 ```
 
@@ -221,7 +221,7 @@ static private class TestCallback extends ILogCallback {
 <dependency>
     <groupId>com.aliyun.openservices</groupId>
     <artifactId>aliyun-log</artifactId>
-    <version>0.6.12</version>
+    <version>0.6.24</version>
     <classifier>jar-with-dependencies</classifier>
     <exclusions>
         <exclusion>
@@ -233,7 +233,7 @@ static private class TestCallback extends ILogCallback {
 <dependency>
     <groupId>com.aliyun.openservices</groupId>
     <artifactId>log-loghub-producer</artifactId>
-    <version>0.1.15</version>
+    <version>0.1.16</version>
     <exclusions>
         <exclusion>
             <groupId>com.google.protobuf</groupId>

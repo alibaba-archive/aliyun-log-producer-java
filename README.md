@@ -70,12 +70,12 @@ The comparison of all kinds of access methods
 <dependency>
 	<groupId>com.aliyun.openservices</groupId>
  	<artifactId>aliyun-log</artifactId>
-	<version>0.6.10</version>
+	<version>0.6.24</version>
 </dependency>
 <dependency>
 	<groupId>com.aliyun.openservices</groupId>
 	<artifactId>log-loghub-producer</artifactId>
-	<version>0.1.15</version>
+	<version>0.1.16</version>
 </dependency>
 ```
 
