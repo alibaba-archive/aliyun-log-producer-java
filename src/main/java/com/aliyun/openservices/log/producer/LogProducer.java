@@ -27,19 +27,35 @@ public class LogProducer {
     }
 
     public void send(String project, String logStore, String topic, String shardHash, String source, List<LogItem> logItems, ILogCallback callabck) {
-        manager.add(project, logStore, topic, shardHash, source, logItems, callabck);
+        manager.add(project, logStore, topic, shardHash, source, logItems, callabck, false);
     }
 
     public void send(String project, String logStore, String topic, String shardHash, String source, List<LogItem> logItems) {
-        manager.add(project, logStore, topic, shardHash, source, logItems, null);
+        manager.add(project, logStore, topic, shardHash, source, logItems, null, false);
     }
 
     public void send(String project, String logStore, String topic, String source, List<LogItem> logItems, ILogCallback callabck) {
-        manager.add(project, logStore, topic, null, source, logItems, callabck);
+        manager.add(project, logStore, topic, null, source, logItems, callabck, false);
     }
 
     public void send(String project, String logStore, String topic, String source, List<LogItem> logItems) {
-        manager.add(project, logStore, topic, null, source, logItems, null);
+        manager.add(project, logStore, topic, null, source, logItems, null, false);
+    }
+
+    public boolean trySend(String project, String logStore, String topic, String shardHash, String source, List<LogItem> logItems, ILogCallback callabck) {
+        return manager.add(project, logStore, topic, shardHash, source, logItems, callabck, true);
+    }
+
+    public boolean trySend(String project, String logStore, String topic, String shardHash, String source, List<LogItem> logItems) {
+        return manager.add(project, logStore, topic, shardHash, source, logItems, null, true);
+    }
+
+    public boolean trySend(String project, String logStore, String topic, String source, List<LogItem> logItems, ILogCallback callabck) {
+        return manager.add(project, logStore, topic, null, source, logItems, callabck, true);
+    }
+
+    public boolean trySend(String project, String logStore, String topic, String source, List<LogItem> logItems) {
+        return manager.add(project, logStore, topic, null, source, logItems, null, true);
     }
 
     public void flush() {

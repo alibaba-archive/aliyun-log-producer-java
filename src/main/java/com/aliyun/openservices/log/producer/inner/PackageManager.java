@@ -124,13 +124,16 @@ public class PackageManager {
         ioThread.shutdownNow();
     }
 
-    public void add(String project, String logStore, String topic,
-                    String shardHash, String source, List<LogItem> srcLogItems,
-                    ILogCallback callback) {
+    public boolean add(String project, String logStore, String topic,
+                       String shardHash, String source, List<LogItem> srcLogItems,
+                       ILogCallback callback, boolean nonBlocking) {
         List<List<LogItem>> sepLogItems = splitLogItems(srcLogItems);
         for (List<LogItem> logItems : sepLogItems) {
-            doAdd(project, logStore, topic, shardHash, source, logItems, callback);
+            if (!doAdd(project, logStore, topic, shardHash, source, logItems, callback, nonBlocking)) {
+                return false;
+            }
         }
+        return true;
     }
 
     public List<List<LogItem>> splitLogItems(List<LogItem> srcLogItems) {
@@ -149,9 +152,9 @@ public class PackageManager {
         return sepLogItems;
     }
 
-    public void doAdd(String project, String logStore, String topic,
-                      String shardHash, String source, List<LogItem> logItems,
-                      ILogCallback callback) {
+    public boolean doAdd(String project, String logStore, String topic,
+                         String shardHash, String source, List<LogItem> logItems,
+                         ILogCallback callback, boolean nonBlocking) {
         if (callback != null) {
             callback.callSendBeginTimeInMillis = System.currentTimeMillis();
         }
@@ -163,7 +166,12 @@ public class PackageManager {
         int linesCount = logItems.size();
         int logBytes = LogItemListBytes(logItems);
 
-        acquireBytes(logBytes);
+        if (nonBlocking) {
+            if (!tryAcquireBytes(logBytes))
+                return false;
+        } else {
+            acquireBytes(logBytes);
+        }
 
         metaRWLock.readLock().lock();
         PackageMeta meta = metaMap.get(key);
@@ -203,5 +211,6 @@ public class PackageManager {
         if (callback != null) {
             callback.callSendEndTimeInMillis = System.currentTimeMillis();
         }
+        return true;
     }
 }
