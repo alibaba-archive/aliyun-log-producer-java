@@ -75,7 +75,7 @@ Aliyun LOG Java Producer 配置分为以下几个步骤：
 <dependency>
 	<groupId>com.aliyun.openservices</groupId>
  	<artifactId>aliyun-log</artifactId>
-	<version>0.6.24</version>
+	<version>0.6.27</version>
 </dependency>
 <dependency>
 	<groupId>com.aliyun.openservices</groupId>
@@ -102,8 +102,6 @@ public class ProducerConfig {
     //producer在处理时会将用户传入的hash映射成shard关联hash区间的最小值。每一个shard关联的hash区间，producer会定时从loghub拉取，该参数的含义是每隔shardHashUpdateIntervalInMS毫秒，
     //更新一次shard的hash区间。
     public int shardHashUpdateIntervalInMS = 10 * 60 * 1000;
-    //如果发送失败，重试的次数，如果超过该值，就会将异常作为callback的参数，交由用户处理。
-    public int retryTimes = 3;
     //protobuf
     public String logsFormat = "protobuf";
     //IO线程池最大线程数量
@@ -156,11 +154,6 @@ public class ProducerConfig {
 <tr>
 <td>shardHashUpdateIntervalInMS</td>
 <td>指定更新Shard的Hash区间的时间间隔，当指定shardhash的方式发送日志时，需要设置此参数。<br>后端merge线程会将映射到同一个Shard的数据merge在一起，而Shard关联的是一个Hash区间，Producer在处理时会将用户传入的Hash映射成Shard关联Hash区间的最小值。每一个Shard关联的Hash区间，Producer会定时从LogHub拉取。</td>
-<td>整数形式。</td>
-</tr>
-<tr>
-<td>retryTimes</td>
-<td>指定发送失败时重试的次数，如果超过该值，就会将异常作为callback的参数，交由用户处理。</td>
 <td>整数形式。</td>
 </tr>
 </tbody>
