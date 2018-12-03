@@ -75,7 +75,7 @@ Aliyun LOG Java Producer 配置分为以下几个步骤：
 <dependency>
 	<groupId>com.aliyun.openservices</groupId>
  	<artifactId>aliyun-log</artifactId>
-	<version>0.6.24</version>
+	<version>0.6.27</version>
 </dependency>
 <dependency>
 	<groupId>com.aliyun.openservices</groupId>
