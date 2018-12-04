@@ -34,3 +34,5 @@ pom.xml.releaseBackup
 
 # Ignore Local Files
 .wb_test_env_rc
+
+src/test/java/com/aliyun/openservices/log/producer/ProducerTest.java

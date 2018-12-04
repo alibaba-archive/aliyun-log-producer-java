@@ -14,8 +14,7 @@ public class ProducerConfig {
     //更新一次shard的hash区间。
     public int shardHashUpdateIntervalInMS = 10 * 60 * 1000;
     //如果发送失败，重试的次数，如果超过该值，就会将异常作为callback的参数，交由用户处理。
-    @Deprecated
-    public int retryTimes = 3;
+    public int retryTimes = 10;
     //json
     public String logsFormat = "protobuf";
     //IO线程池最大线程数量

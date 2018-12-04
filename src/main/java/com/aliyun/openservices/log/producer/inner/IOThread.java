@@ -121,29 +121,30 @@ class IOThread extends Thread {
     }
 
     private void sendData(BlockedData bd) {
-        LogException excp = null;
+        LogException logException = null;
         PutLogsResponse response = null;
         try {
             response = doSendData(bd);
         } catch (LogException e) {
             LOGGER.error("Failed to send data.", e);
-            excp = e;
+            logException = e;
         } catch (Exception e) {
             LOGGER.error("Failed to send data.", e);
-            excp = new LogException("Exception", e.getMessage(), "");
+            logException = new LogException("Exception", e.getMessage(), "");
         } catch (Error e) {
             LOGGER.error("Failed to send data.", e);
-            excp = new LogException("Error", e.getMessage(), "");
+            logException = new LogException("Error", e.getMessage(), "");
         }
         long currTime = System.currentTimeMillis();
         float sec = (currTime - sendLogTimeWindowInMillis.get()) / 1000.0f;
         float outflow = 0;
         if (sec > 0)
             outflow = sendLogBytes.get() / sec;
-        executeCallback(bd, response, excp, outflow);
+        executeCallback(bd, response, logException, outflow);
     }
 
-    private PutLogsResponse doSendData(BlockedData bd) throws LogException {
+
+    private PutLogsResponse doSendData(BlockedData bd) throws LogException, InterruptedException {
         try {
             Client clt = clientPool.getClient(bd.data.project);
             if (clt == null) {
@@ -151,23 +152,26 @@ class IOThread extends Thread {
                         "the config of project " + bd.data.project + " is not exist", "");
             } else {
                 int retry = 0;
-                LogException excep = null;
-                PutLogsResponse response = null;
-                while (retry++ <= producerConfig.retryTimes) {
+                int sleepTimeInSecs = 1;
+                while (true) {
                     try {
-                        response = sendRequest(clt, bd);
-                        excep = null;
-                        break;
+                        return sendRequest(clt, bd);
                     } catch (LogException e) {
-                        excep = new LogException(e.GetErrorCode(),
-                                e.GetErrorMessage() + ", itemscount: "
-                                        + bd.data.items.size(), e.GetRequestId());
+                        if (e.GetErrorCode().equals("RequestError") || e.GetErrorCode().equals("Unauthorized") || e.GetErrorCode().equals("WriteQuotaExceed") || e.GetErrorCode().equals("InternalServerError") || e.GetErrorCode().equals("ServerBusy")) {
+                            if (retry > producerConfig.retryTimes) {
+                                throw e;
+                            }
+                            LOGGER.warn("Failed to send request, errorCode=" + e.GetErrorCode() + ", errorMessage=" + e.GetErrorMessage() + ", requestId=" + e.GetRequestId() + ", retry=" + retry);
+                            Thread.sleep(sleepTimeInSecs * 1000);
+                            if (sleepTimeInSecs < 512) {
+                                sleepTimeInSecs = sleepTimeInSecs * 2;
+                            }
+                            ++retry;
+                        } else {
+                            throw e;
+                        }
                     }
                 }
-                if (excep != null) {
-                    throw excep;
-                }
-                return response;
             }
         } finally {
             packageManager.releaseBytes(bd.bytes);
