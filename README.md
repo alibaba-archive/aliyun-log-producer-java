@@ -96,6 +96,8 @@ public class ProducerConfig {
     // The backend thread will merge the data being sent to the same shard together, and shard is associated with a hash interval.
     // The producer will pull the hash interval information for each shard from AliCloud Log Service regularly and update the local value, this parameter stands for the time interval.
     public int shardHashUpdateIntervalInMS = 10 * 60 * 1000;
+    // Specify the retry times, default is 10. If exceeds this value, the exception will pass to the callback.
+    public int retryTimes = 10;
     // protobuf
     public String logsFormat = "protobuf";
     // Specify the I/O thread pool's maximum pool size, the main function of the I/O thread pool is to send data, default is 8
@@ -149,6 +151,11 @@ The main function of callback is to handle the results of sending data. The resu
 <td>shardHashUpdateIntervalInMS</td>
 <td>If shardHash is specified when you send data, you should care about this parameter, otherwise there is no need to care about it. The backend thread will merge the data being sent to the same shard together, and shard is associated with a hash interval. The producer will pull the hash interval information for each shard from AliCloud Log Service regularly and update the local value, this parameter stands for the time interval.</td>
 <td>Integer, in milliseconds</td>
+</tr>
+<tr>
+<td>retryTimes</td>
+<td>Specify the retry times, default is 10. If exceeds this value, the exception will pass to the callback.</td>
+<td>Integer</td>
 </tr>
 </tbody>
 </table>
