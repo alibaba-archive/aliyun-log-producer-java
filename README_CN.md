@@ -102,6 +102,8 @@ public class ProducerConfig {
     //producer在处理时会将用户传入的hash映射成shard关联hash区间的最小值。每一个shard关联的hash区间，producer会定时从loghub拉取，该参数的含义是每隔shardHashUpdateIntervalInMS毫秒，
     //更新一次shard的hash区间。
     public int shardHashUpdateIntervalInMS = 10 * 60 * 1000;
+    //如果发送失败，重试的次数，如果超过该值，就会将异常作为callback的参数，交由用户处理。默认 10 次，重试时间间隔采用指数退避算法，即第一次间隔 1 秒，第二次 2 秒，第三次 4 秒，最长间隔为 512 秒。重试 10 次总耗时 1023 秒。
+    public int retryTimes = 10;
     //protobuf
     public String logsFormat = "protobuf";
     //IO线程池最大线程数量
@@ -154,6 +156,12 @@ public class ProducerConfig {
 <tr>
 <td>shardHashUpdateIntervalInMS</td>
 <td>指定更新Shard的Hash区间的时间间隔，当指定shardhash的方式发送日志时，需要设置此参数。<br>后端merge线程会将映射到同一个Shard的数据merge在一起，而Shard关联的是一个Hash区间，Producer在处理时会将用户传入的Hash映射成Shard关联Hash区间的最小值。每一个Shard关联的Hash区间，Producer会定时从LogHub拉取。</td>
+<td>整数形式。</td>
+</tr>
+<tr>
+<td>retryTimes</td>
+<td>如果发送失败，重试的次数，如果超过该值，就会将异常作为callback的参数，交由用户处理。默认 10 次，重试时间间隔采用指数退避算法，即第一次间隔 1 秒，第二次 2 秒，第三次 4 秒，最长间隔为 512 秒。重试 10 次总耗时 1023 秒。您可以通过调整重试次数，控制重试总耗时。
+</td>
 <td>整数形式。</td>
 </tr>
 </tbody>
