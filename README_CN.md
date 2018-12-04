@@ -328,7 +328,7 @@ https://help.aliyun.com/document_detail/28976.html
 
 **Q**：producer 在网络发生异常的情况下会如何处理待发送的数据？
 
-**A**：producer 会尝试 `retryTimes` 次，若仍没有成功，会将异常信息作为参数传递给用户定义的回调函数。您可以在回调函数中再次调用 `producer.send()` 方法重新发送写入失败的数据。
+**A**：在 0.1.17 及之后的版本中，producer 会在遇到`RequestError`、`Unauthorized`、`WriteQuotaExceed`、`InternalServerError`、`ServerBusy`这些错误时进行重试，最多重试`retryTimes`次，若仍没有成功，会将异常信息作为参数传递给用户定义的回调函数。重试的时间间隔由 1 秒开始指数递增，最大为 512 秒。如果您使用默认的`retryTimes`，在遇到上述错误后最多重试 1023 秒。建议您不要在 callback 里不要进行重试，将重试的任务交给 producer 处理，因为在 callback 里重试可能导致死锁。
 
 **Q**：producer 能否保证日志上传顺序？即先发送的日志排先写入服务端？
 
