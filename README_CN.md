@@ -1,12 +1,11 @@
-# Aliyun LOG Java Producer
+# Aliyun LOG Java Producer（废弃）
 
 [![Build Status](https://travis-ci.org/aliyun/aliyun-log-producer-java.svg?branch=master)](https://travis-ci.org/aliyun/aliyun-log-producer-java)
 [![License](https://img.shields.io/badge/license-Apache2.0-blue.svg)](/LICENSE)
 
 [README in English](/README.md)
 
-Aliyun LOG Java Producer 是针对 Java 应用程序编写的高并发写 LogHub 类库，Producer Library 和 [Consumer Library](https://yq.aliyun.com/articles/6817) 是对 LogHub 的读写包装，降低数据收集与消费的门槛。
-
+该项目已不再维护，请使用新版 [Aliyun LOG Java Producer](https://github.com/aliyun/aliyun-log-producer)。
 
 ## 功能特点
 
