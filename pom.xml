@@ -44,7 +44,7 @@
         <slf4j.version>1.7.15</slf4j.version>
         <logback.version>1.2.3</logback.version>
         <aliyun-log.version>0.6.27</aliyun-log.version>
-        <fastjson.version>1.2.54</fastjson.version>
+        <fastjson.version>1.2.83</fastjson.version>
         <gson.version>2.2.4</gson.version>
     </properties>
 
